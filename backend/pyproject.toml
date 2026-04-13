@@ -1,0 +1,17 @@
+[project]
+name = "backend-flota"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.42.76",
+    "fastapi>=0.135.1",
+    "minio>=7.2.20",
+    "pydantic>=2.12.5",
+    "pymysql>=1.1.2",
+    "python-dateutil>=2.9.0.post0",
+    "python-dotenv>=1.2.2",
+    "sqlalchemy>=2.0.48",
+    "uvicorn[standard]>=0.41.0",
+]

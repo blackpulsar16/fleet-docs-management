@@ -1,0 +1,15 @@
+[project]
+name = "ai-ocr"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.42.81",
+    "fastapi[standard]>=0.135.3",
+    "langchain>=1.2.14",
+    "langchain-google-genai>=4.2.1",
+    "langgraph>=1.1.4",
+    "minio>=7.2.20",
+    "python-dotenv>=1.2.2",
+]

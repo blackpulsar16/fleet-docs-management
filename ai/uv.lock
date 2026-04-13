@@ -18,6 +18,7 @@ dependencies = [
     { name = "langgraph" },
     { name = "minio" },
     { name = "python-dotenv" },
+    { name = "tenacity" },
 ]
 
 [package.metadata]
@@ -29,6 +30,7 @@ requires-dist = [
     { name = "langgraph", specifier = ">=1.1.4" },
     { name = "minio", specifier = ">=7.2.20" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
+    { name = "tenacity", specifier = ">=9.1.4" },
 ]
 
 [[package]]

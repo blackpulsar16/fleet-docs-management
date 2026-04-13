@@ -14,6 +14,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from dotenv import load_dotenv
 
@@ -121,6 +122,31 @@ def upload_to_minio(local_path: str, vehicle_id: str, doc_type: str = None) -> s
     return f"s3://{S3_BUCKET_NAME}/{object_name}"
 
 
+def delete_from_minio(s3_uri: str):
+    """Deletes an object from MinIO given its S3 URI (Rollback)."""
+    if not s3_uri or not s3_uri.startswith(f"s3://{S3_BUCKET_NAME}/"):
+        return
+    object_name = s3_uri[len(f"s3://{S3_BUCKET_NAME}/"):]
+    try:
+        client = get_minio_client()
+        client.remove_object(S3_BUCKET_NAME, object_name)
+    except Exception as e:
+        print(f"Failed to rollback file {object_name} from MinIO: {e}")
+
+
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_exception_type(requests.exceptions.RequestException),
+    reraise=True,
+)
+def send_to_backend(payload: dict) -> requests.Response:
+    """Sends data to the backend API with retries."""
+    response = requests.post(f"{INGESTION_API_URL}/ingest-documents", json=payload, timeout=15)
+    response.raise_for_status()
+    return response
+
+
 def _sse(payload: dict) -> str:
     """Formats a dict as an SSE data line."""
     return f"data: {json.dumps(payload, default=str)}\n\n"
@@ -179,35 +205,43 @@ async def process_file(
         if final_result:
             s3_uri = upload_to_minio(str(tmp_path), vehicle_id, doc_type=final_result.get("doc_type"))
 
-            response = requests.post(
-                f"{INGESTION_API_URL}/ingest-documents",
-                json={
-                    "vehicle_id": vehicle_id,
-                    "documents": [
-                        {
-                            "doc_type": final_result.get("doc_type"),
-                            "data": final_result.get("data"),
-                            "file_path": s3_uri,
-                        }
-                    ],
-                },
-            )
-
-            safe_result = {k: v for k, v in final_result.items() if k != "file_path"}
-
-            await queue.put(
-                _sse(
+            payload = {
+                "vehicle_id": vehicle_id,
+                "documents": [
                     {
-                        "file": file_id,
-                        "status": "completed",
-                        "final_data": {
-                            "message": "File processed successfully",
-                            "result": safe_result,
-                            "database_response": response.json() if response.status_code == 200 else {"error": response.text},
-                        },
+                        "doc_type": final_result.get("doc_type"),
+                        "data": final_result.get("data"),
+                        "file_path": s3_uri,
                     }
+                ],
+            }
+
+            try:
+                # Run the blocking retry-decorated function in a thread to keep FastAPI async
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(None, lambda: send_to_backend(payload))
+
+                safe_result = {k: v for k, v in final_result.items() if k != "file_path"}
+
+                await queue.put(
+                    _sse(
+                        {
+                            "file": file_id,
+                            "status": "completed",
+                            "final_data": {
+                                "message": "File processed successfully",
+                                "result": safe_result,
+                                "database_response": response.json(),
+                            },
+                        }
+                    )
                 )
-            )
+            except Exception as ingest_exc:
+                # Rollback: delete from MinIO if DB update fails after all retries
+                delete_from_minio(s3_uri)
+                error_msg = f"Database ingestion failed after retries: {str(ingest_exc)}"
+                await queue.put(_sse({"file": file_id, "status": "error", "message": error_msg}))
+
         else:
             await queue.put(_sse({"file": file_id, "status": "no_result", "message": "El agente no produjo resultados"}))
 

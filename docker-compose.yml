@@ -125,6 +125,8 @@ services:
       - sol-api
     networks:
       - flota-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 # ── Volúmenes persistentes ────────────────────────────────────
 volumes:

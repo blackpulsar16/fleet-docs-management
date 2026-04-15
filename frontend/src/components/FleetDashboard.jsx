@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronsUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ChevronsUpDown, ArrowUp, ArrowDown, LogOut } from 'lucide-react';
+import { useAuth } from 'react-oidc-context';
 import ExpandedVehicleRow from './ExpandedVehicleRow.jsx';
 import { formatTitle, extractDocName, parseExpirationString, renderDocIcon } from '../utils/helpers.jsx';
 import { FLEET_API, SOL_API, AI_API } from '../config/api.js';
 
 export default function FleetDashboard() {
     const queryClientInstance = useQueryClient();
+    const auth = useAuth();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -417,6 +419,17 @@ export default function FleetDashboard() {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                 SUBIR DOC
                             </button>
+
+                            {/* LOGOUT BUTTON */}
+                            {auth.isAuthenticated && (
+                                <button
+                                    onClick={() => void auth.signoutRedirect()}
+                                    className="ml-2 px-3 py-2 bg-slate-100 border border-slate-200 text-slate-600 rounded-lg text-sm font-bold shadow-sm hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all flex items-center gap-2"
+                                    title="Cerrar sesión"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                </button>
+                            )}
 
                         </div>
 

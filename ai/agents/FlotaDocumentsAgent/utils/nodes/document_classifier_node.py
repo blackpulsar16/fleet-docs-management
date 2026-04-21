@@ -63,8 +63,8 @@ If the document does not correspond to any of the above you HAVE to return 'unkn
             model=CLASSIFICATION_MODEL,
             thinking_level=CLASSIFICATION_THINKING_LEVEL,
             media_resolution=CLASSIFICATION_IMAGE_RESOLUTION,
-            generation_config={"service_tier": "flex"},  # Flex tier: 50% cheaper, latency-tolerant
-            request_options={"timeout": 600},  # 10 min timeout requerido por Flex
+            timeout=600,  # 10 min timeout requerido por Flex
+            model_kwargs={"generation_config": {"service_tier": "flex"}},  # Flex tier: 50% cheaper, latency-tolerant
         )
         .with_structured_output(DocumentOCR)
         .invoke([messages])

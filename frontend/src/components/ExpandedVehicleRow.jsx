@@ -2,17 +2,19 @@ import React, { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatTitle, formatSpecValue, getDocStatus } from '../utils/helpers.jsx';
 import { FLEET_API, SOL_API } from '../config/api.js';
+import { useApiClient } from '../hooks/useApiClient.js';
 
 export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, onClose }) {
     const [viewingDoc, setViewingDoc] = useState(null);
     const [viewerScale, setViewerScale] = useState(1);
     const [viewerRotation, setViewerRotation] = useState(0);
+    const { fetchWithAuth } = useApiClient();
 
     const { data: docs = [], isLoading: isLoadingDocs } = useQuery({
         queryKey: ['documents', vehicle?.id],
         queryFn: async () => {
             if (!vehicle?.id) return [];
-            const response = await fetch(`${FLEET_API}/vehicles/${vehicle.id}/documents`);
+            const response = await fetchWithAuth(`${FLEET_API}/vehicles/${vehicle.id}/documents`);
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data.documents) ? data.documents : [];
@@ -24,7 +26,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
         queryKey: ['specs', vehicle?.id],
         queryFn: async () => {
             if (!vehicle?.id) return null;
-            const response = await fetch(`${SOL_API}/sol/vehiculo/${vehicle.id}`);
+            const response = await fetchWithAuth(`${SOL_API}/sol/vehiculo/${vehicle.id}`);
             if (!response.ok) return null;
             return response.json();
         },

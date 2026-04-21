@@ -5,10 +5,12 @@ import { useAuth } from 'react-oidc-context';
 import ExpandedVehicleRow from './ExpandedVehicleRow.jsx';
 import { formatTitle, extractDocName, parseExpirationString, renderDocIcon } from '../utils/helpers.jsx';
 import { FLEET_API, SOL_API, AI_API } from '../config/api.js';
+import { useApiClient } from '../hooks/useApiClient.js';
 
 export default function FleetDashboard() {
     const queryClientInstance = useQueryClient();
     const auth = useAuth();
+    const { fetchWithAuth } = useApiClient();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -43,9 +45,9 @@ export default function FleetDashboard() {
         queryKey: ['fleet_merged'],
         queryFn: async () => {
             const [fleetRes, plazasRes, estatusRes] = await Promise.all([
-                fetch(`${FLEET_API}/fleet`).catch(() => null),
-                fetch(`${SOL_API}/sol/plazas`).catch(() => null),
-                fetch(`${SOL_API}/sol/estatus`).catch(() => null)
+                fetchWithAuth(`${FLEET_API}/fleet`).catch(() => null),
+                fetchWithAuth(`${SOL_API}/sol/plazas`).catch(() => null),
+                fetchWithAuth(`${SOL_API}/sol/estatus`).catch(() => null)
             ]);
 
             if (!fleetRes || !fleetRes.ok) throw new Error('Fleet network response was not ok');
@@ -170,7 +172,7 @@ export default function FleetDashboard() {
         uploadFiles.forEach(f => formData.append('files', f));
 
         try {
-            const response = await fetch(`${AI_API}/ai/${uploadVehicleId}`, {
+            const response = await fetchWithAuth(`${AI_API}/ai/${uploadVehicleId}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -288,7 +290,7 @@ export default function FleetDashboard() {
         if (downloadingVehicleId) return;
         setDownloadingVehicleId(vehicleId);
         try {
-            const response = await fetch(`${FLEET_API}/vehicles/${vehicleId}/documents/download-all`);
+            const response = await fetchWithAuth(`${FLEET_API}/vehicles/${vehicleId}/documents/download-all`);
             if (!response.ok) throw new Error('Error al descargar');
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);

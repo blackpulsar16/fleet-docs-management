@@ -1,7 +1,8 @@
 import os
 import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from auth import verify_token
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import numpy as np
@@ -76,7 +77,7 @@ app.add_middleware(
 )
 
 @app.get("/sol/vehiculo/{economico}")
-async def get_vehiculo(economico: str):
+async def get_vehiculo(economico: str, auth: dict = Depends(verify_token)):
     if df_global is None:
         raise HTTPException(status_code=500, detail="Database not loaded into server memory.")
 
@@ -87,14 +88,14 @@ async def get_vehiculo(economico: str):
     return data
 
 @app.get("/sol/plazas")
-async def get_plazas():
+async def get_plazas(auth: dict = Depends(verify_token)):
     if not plazas_dict_global:
         raise HTTPException(status_code=500, detail="Plazas dictionary is empty or not loaded.")
     
     return plazas_dict_global
 
 @app.get("/sol/estatus")
-async def get_status():
+async def get_status(auth: dict = Depends(verify_token)):
     if not status_dict_global:
         raise HTTPException(status_code=500, detail="Status dictionary is empty or not loaded.")
     return status_dict_global

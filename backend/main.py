@@ -13,6 +13,7 @@ import mimetypes
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from src.utils import calculate_status
+from src.auth import verify_token
 
 app = FastAPI(title="OCR Document Dashboard API")
 
@@ -160,7 +161,7 @@ def get_db():
 
 
 @app.post("/ingest-documents")
-def ingest_ocr_data(payload: CleanPayload, db: Session = Depends(get_db)):
+def ingest_ocr_data(payload: CleanPayload, db: Session = Depends(get_db), auth: dict = Depends(verify_token)):
     if not db.query(Vehicle).filter(Vehicle.vehicle_id == payload.vehicle_id).first():
         db.add(Vehicle(vehicle_id=payload.vehicle_id))
         db.flush()  # Use flush to keep it in the same transaction until the end
@@ -205,12 +206,12 @@ def ingest_ocr_data(payload: CleanPayload, db: Session = Depends(get_db)):
 
 
 @app.get("/vehicles")
-def get_vehicles(db: Session = Depends(get_db)):
+def get_vehicles(db: Session = Depends(get_db), auth: dict = Depends(verify_token)):
     return {"vehicles": [v[0] for v in db.query(Vehicle.vehicle_id).all()]}
 
 
 @app.get("/vehicles/{vehicle_id}/documents")
-def get_vehicle_documents(vehicle_id: str, db: Session = Depends(get_db)):
+def get_vehicle_documents(vehicle_id: str, db: Session = Depends(get_db), auth: dict = Depends(verify_token)):
     if not db.query(Vehicle).filter(Vehicle.vehicle_id == vehicle_id).first():
         raise HTTPException(status_code=404, detail="Vehicle not found")
 
@@ -232,7 +233,7 @@ def get_vehicle_documents(vehicle_id: str, db: Session = Depends(get_db)):
 
 
 @app.get("/vehicles/{vehicle_id}/documents/download-all")
-def download_all_vehicle_documents(vehicle_id: str, db: Session = Depends(get_db)):
+def download_all_vehicle_documents(vehicle_id: str, db: Session = Depends(get_db), auth: dict = Depends(verify_token)):
     """Downloads all documents for a vehicle and returns them as a ZIP archive."""
     if not db.query(Vehicle).filter(Vehicle.vehicle_id == vehicle_id).first():
         raise HTTPException(status_code=404, detail="Vehicle not found")
@@ -293,7 +294,7 @@ def download_all_vehicle_documents(vehicle_id: str, db: Session = Depends(get_db
 
 
 @app.get("/fleet")
-def get_fleet_dashboard(db: Session = Depends(get_db)):
+def get_fleet_dashboard(db: Session = Depends(get_db), auth: dict = Depends(verify_token)):
     from collections import defaultdict
 
     vehicles = db.query(Vehicle).all()

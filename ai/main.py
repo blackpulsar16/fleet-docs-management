@@ -10,7 +10,8 @@ from typing import List
 import boto3
 import requests
 from botocore.config import Config
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Depends, Request
+from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
@@ -21,6 +22,7 @@ from dotenv import load_dotenv
 try:
     load_dotenv()
     from agents.FlotaDocumentsAgent import SingleFileAgent
+    from src.auth import verify_token
 except Exception:
     raise
 
@@ -140,9 +142,15 @@ def delete_from_minio(s3_uri: str):
     retry=retry_if_exception_type(requests.exceptions.RequestException),
     reraise=True,
 )
-def send_to_backend(payload: dict) -> requests.Response:
-    """Sends data to the backend API with retries."""
-    response = requests.post(f"{INGESTION_API_URL}/ingest-documents", json=payload, timeout=15)
+def send_to_backend(payload: dict, bearer_token: str) -> requests.Response:
+    """Sends data to the backend API with retries, forwarding the caller's Bearer token."""
+    headers = {"Authorization": f"Bearer {bearer_token}"}
+    response = requests.post(
+        f"{INGESTION_API_URL}/ingest-documents",
+        json=payload,
+        headers=headers,
+        timeout=15,
+    )
     response.raise_for_status()
     return response
 
@@ -166,6 +174,7 @@ async def process_file(
     filename: str,
     tmp_path: Path,
     queue: asyncio.Queue,
+    bearer_token: str = "",
 ) -> None:
     """
     Runs the agent for one file, pushing SSE-formatted strings into *queue*.
@@ -219,7 +228,7 @@ async def process_file(
             try:
                 # Run the blocking retry-decorated function in a thread to keep FastAPI async
                 loop = asyncio.get_event_loop()
-                response = await loop.run_in_executor(None, lambda: send_to_backend(payload))
+                response = await loop.run_in_executor(None, lambda: send_to_backend(payload, bearer_token))
 
                 safe_result = {k: v for k, v in final_result.items() if k != "file_path"}
 
@@ -262,7 +271,12 @@ async def process_file(
 # ---------------------------------------------------------------------------
 
 @app.post("/ai/{vehicle_id}")
-async def ocr_multiple_files(vehicle_id: str, files: List[UploadFile] = File(...)):
+async def ocr_multiple_files(
+    vehicle_id: str,
+    request: Request,
+    files: List[UploadFile] = File(...),
+    auth: dict = Depends(verify_token),
+):
     """
     Receives 1..N files, processes them **in parallel**, and streams
     per-file SSE events as they complete.
@@ -277,6 +291,10 @@ async def ocr_multiple_files(vehicle_id: str, files: List[UploadFile] = File(...
     { file, status: "error",        message }
     { status: "all_done",           total }        ← sentinel
     """
+
+    # Extract raw Bearer token to forward it to the backend service
+    auth_header = request.headers.get("Authorization", "")
+    bearer_token = auth_header.removeprefix("Bearer ").strip()
 
     # Save all uploads to temp files before streaming begins
     tmp_paths: list[tuple[str, Path]] = []
@@ -293,7 +311,7 @@ async def ocr_multiple_files(vehicle_id: str, files: List[UploadFile] = File(...
     async def event_stream():
         # Kick off all workers concurrently
         tasks = [
-            asyncio.create_task(process_file(vehicle_id, fname, path, queue))
+            asyncio.create_task(process_file(vehicle_id, fname, path, queue, bearer_token))
             for fname, path in tmp_paths
         ]
 

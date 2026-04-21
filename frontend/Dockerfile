@@ -6,6 +6,14 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Variables de Vite (inyectadas desde el .env raíz vía docker-compose build args)
+ARG VITE_AUTHENTIK_AUTHORITY
+ARG VITE_AUTHENTIK_CLIENT_ID
+ARG VITE_AUTHENTIK_REDIRECT_URI
+ENV VITE_AUTHENTIK_AUTHORITY=$VITE_AUTHENTIK_AUTHORITY
+ENV VITE_AUTHENTIK_CLIENT_ID=$VITE_AUTHENTIK_CLIENT_ID
+ENV VITE_AUTHENTIK_REDIRECT_URI=$VITE_AUTHENTIK_REDIRECT_URI
+
 # Copiamos el resto del código y construimos la aplicación
 COPY . .
 RUN npm run build

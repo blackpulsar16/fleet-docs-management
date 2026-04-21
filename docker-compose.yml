@@ -121,6 +121,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_AUTHENTIK_AUTHORITY: ${VITE_AUTHENTIK_AUTHORITY}
+        VITE_AUTHENTIK_CLIENT_ID: ${VITE_AUTHENTIK_CLIENT_ID}
+        VITE_AUTHENTIK_REDIRECT_URI: ${VITE_AUTHENTIK_REDIRECT_URI}
     container_name: frontend-flota
     ports:
       - "8001:80"

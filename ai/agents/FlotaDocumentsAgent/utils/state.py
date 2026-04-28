@@ -3,7 +3,7 @@ import operator
 from langchain.messages import AnyMessage
 
 
-class FlotaDocumentsState:
+class FlotaDocumentsState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
     folder_path: str
     list_of_files: list
@@ -18,7 +18,7 @@ class ClassifiedDocState(TypedDict):
     doc_type: str
 
 
-class SingleFileState:
+class SingleFileState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
     file_path: str
     classified_docs: Annotated[list[dict],operator.add]

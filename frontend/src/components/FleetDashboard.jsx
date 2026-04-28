@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronsUpDown, ArrowUp, ArrowDown, LogOut } from 'lucide-react';
 import { useAuth } from 'react-oidc-context';
+import { useRole } from '../hooks/useRole.js';
 import ExpandedVehicleRow from './ExpandedVehicleRow.jsx';
+import DocumentReviewModal from './DocumentReviewModal.jsx';
+import DocFilterView from './DocFilterView.jsx';
+import DiscrepancyView from './DiscrepancyView.jsx';
 import { formatTitle, extractDocName, parseExpirationString, renderDocIcon } from '../utils/helpers.jsx';
 import { FLEET_API, SOL_API, AI_API } from '../config/api.js';
 import { useApiClient } from '../hooks/useApiClient.js';
@@ -10,16 +14,24 @@ import { useApiClient } from '../hooks/useApiClient.js';
 export default function FleetDashboard() {
     const queryClientInstance = useQueryClient();
     const auth = useAuth();
+    const { isEditor } = useRole();
     const { fetchWithAuth } = useApiClient();
 
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [unFilter, setUnFilter] = useState('all');
     const [sysStatusFilter, setSysStatusFilter] = useState('all');
+    const [docTypeFilter, setDocTypeFilter] = useState('all');
+    const [docStateFilter, setDocStateFilter] = useState('all');
     const [sortConfig, setSortConfig] = useState({ key: 'id', dir: 'asc' });
+
+    const [isDiscrepancyView, setIsDiscrepancyView] = useState(false);
 
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [activeTab, setActiveTab] = useState('docs');
+    const [autoOpenReviewTrigger, setAutoOpenReviewTrigger] = useState(0);
+    const [sessionReviewDocs, setSessionReviewDocs] = useState([]);
+    const [isSessionReviewOpen, setIsSessionReviewOpen] = useState(false);
 
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [uploadVehicleId, setUploadVehicleId] = useState('');
@@ -40,6 +52,7 @@ export default function FleetDashboard() {
     const currentScrolledIdRef = useRef(null);
     const lastIdCheckRef = useRef(0);
     const uploadHasErrorsRef = useRef(false);
+    const sessionDocsRef = useRef([]);
 
     const { data: vehicles = [], isLoading: isLoadingFleet } = useQuery({
         queryKey: ['fleet_merged'],
@@ -74,10 +87,28 @@ export default function FleetDashboard() {
     const uniqueUNs = useMemo(() => [...new Set(vehicles.map(v => v.un))].filter(Boolean).sort(), [vehicles]);
     const uniqueSysStatuses = useMemo(() => [...new Set(vehicles.map(v => v.sysStatus))].filter(Boolean).sort(), [vehicles]);
 
+    // Map internal doc_type keys → human-readable labels
+    const DOC_TYPE_OPTIONS = [
+        { value: 'all', label: 'Tipo doc: Todos' },
+        { value: 'dictamen_gas', label: 'Dictamen de Gas' },
+        { value: 'tarjeta_circulacion_front', label: 'Tarjeta Circulación' },
+        { value: 'poliza_seguro', label: 'Póliza de Seguro' },
+        { value: 'certificacion_blindaje', label: 'Cert. Blindaje' },
+        { value: 'bill_make', label: 'Carta Factura' },
+    ];
+
+    const DOC_STATE_OPTIONS = [
+        { value: 'all', label: 'Estado doc: Todos' },
+        { value: 'missing', label: 'Faltante' },
+        { value: 'expired', label: 'Vencido' },
+        { value: 'expiring', label: 'Por vencer (≤30 días)' },
+        { value: 'ok', label: 'Vigente' },
+    ];
+
     useEffect(() => {
         setSelectedVehicle(null);
         setActiveTab('docs');
-    }, [searchTerm, statusFilter, unFilter, sysStatusFilter, sortConfig]);
+    }, [searchTerm, statusFilter, unFilter, sysStatusFilter, docTypeFilter, docStateFilter, sortConfig]);
 
     useEffect(() => {
         if (selectedVehicle) {
@@ -145,6 +176,32 @@ export default function FleetDashboard() {
         critical: baseFilteredVehicles.filter(v => v.status === 'critical').length
     }), [baseFilteredVehicles]);
 
+    // Fetch doc-summary when a document type filter is active
+    const { data: docSummaryData } = useQuery({
+        queryKey: ['doc_summary', docTypeFilter],
+        queryFn: async () => {
+            const res = await fetchWithAuth(`${FLEET_API}/fleet/doc-summary?doc_type=${docTypeFilter}`);
+            if (!res.ok) throw new Error('doc summary error');
+            return res.json();
+        },
+        enabled: docTypeFilter !== 'all',
+        staleTime: 30_000,
+    });
+
+    // KPI counts: when doc filter is active, show doc-level counts
+    const activeStats = useMemo(() => {
+        if (docTypeFilter !== 'all' && docSummaryData?.summary) {
+            const s = docSummaryData.summary;
+            return {
+                total: s.ok + s.expiring + s.expired + s.missing,
+                ok: s.ok,
+                warning: s.expiring,
+                critical: s.expired + s.missing,
+            };
+        }
+        return stats;
+    }, [docTypeFilter, docSummaryData, stats]);
+
     const allVehicleIds = useMemo(() => Array.from(new Set(safeVehicles.map(v => v.id))), [safeVehicles]);
 
     const resetUploadModal = () => {
@@ -155,14 +212,34 @@ export default function FleetDashboard() {
         setFileStatuses({});
         setUploadErrorMsg('');
         uploadHasErrorsRef.current = false;
+        setSessionReviewDocs([]);
+        sessionDocsRef.current = [];
     };
 
-    const handleGlobalUpload = async (e) => {
+    const handleStartValidation = useCallback(() => {
+        const docsToReview = sessionDocsRef.current;
+        if (docsToReview.length > 0) {
+            setSessionReviewDocs([...docsToReview]);
+            setIsSessionReviewOpen(true);
+            setIsUploadModalOpen(false);
+            setAutoOpenReviewTrigger(0); // Reset dashboard trigger to prevent dual modals
+        } else {
+            // If for some reason there are no session docs, just close the modal
+            resetUploadModal();
+        }
+    }, []);
+
+    const handleGlobalUpload = useCallback(async (e) => {
         e.preventDefault();
         if (!uploadFiles.length || !uploadVehicleId) return;
 
         setUploadPhase('uploading');
         setUploadErrorMsg('');
+        
+        // Reset session docs to ensure we only review current upload
+        sessionDocsRef.current = [];
+        setSessionReviewDocs([]);
+        
         // Initialize all files as 'processing'
         const initialStatuses = {};
         uploadFiles.forEach(f => { initialStatuses[f.name] = { status: 'processing', docType: '' }; });
@@ -195,6 +272,8 @@ export default function FleetDashboard() {
                     if (data.status === 'all_done') {
                         queryClientInstance.invalidateQueries({ queryKey: ['fleet_merged'] });
                         queryClientInstance.invalidateQueries({ queryKey: ['documents', uploadVehicleId] });
+                        queryClientInstance.invalidateQueries({ queryKey: ['fleet_discrepancies'] });
+                        
                         if (uploadHasErrorsRef.current) {
                             // Hubo archivos con error — NO mostrar pantalla verde,
                             // el usuario ya ve los errores por archivo en la lista.
@@ -202,20 +281,36 @@ export default function FleetDashboard() {
                             setUploadErrorMsg('Uno o más documentos no pudieron clasificarse. Revisa los archivos marcados en rojo.');
                         } else {
                             setUploadPhase('completed');
-                            setTimeout(resetUploadModal, 3000);
+                            // Auto-trigger session review after a short delay
+                            setTimeout(() => {
+                                handleStartValidation();
+                            }, 1500);
                         }
                         return;
                     }
 
                     if (data.file) {
-                        if (data.status === 'error') {
+                        if (['error', 'unclassified', 'no_result'].includes(data.status)) {
                             uploadHasErrorsRef.current = true;
+                        }
+                        if (data.status === 'completed') {
+                            const ingested = data.final_data?.database_response?.ingested_docs || 
+                                            data.database_response?.ingested_docs || 
+                                            data.ingested_docs;
+                                            
+                            if (ingested && Array.isArray(ingested)) {
+                                const existingIds = new Set(sessionDocsRef.current.map(d => d.id));
+                                const uniqueNew = ingested.filter(d => !existingIds.has(d.id));
+                                sessionDocsRef.current = [...sessionDocsRef.current, ...uniqueNew];
+                                setSessionReviewDocs([...sessionDocsRef.current]);
+                            }
                         }
                         setFileStatuses(prev => ({
                             ...prev,
                             [data.file]: {
                                 status: data.status,
                                 docType: data.document_type || prev[data.file]?.docType || '',
+                                errorMsg: data.message || data.error || prev[data.file]?.errorMsg || ''
                             }
                         }));
                     }
@@ -254,12 +349,48 @@ export default function FleetDashboard() {
             setUploadPhase('error');
             setUploadErrorMsg('Error de red.');
         }
-    };
+    }, [uploadFiles, uploadVehicleId, fetchWithAuth, handleStartValidation, queryClientInstance]);
 
     const filteredVehicles = useMemo(() => {
         const statusOrder = { critical: 0, warning: 1, ok: 2 };
         return baseFilteredVehicles
             .filter(v => statusFilter === 'all' || v.status === statusFilter)
+            .filter(v => {
+                if (docTypeFilter === 'all') return true;
+
+                const availableDocs = v.availableDocs || [];
+                const missingDocs = v.missingDocs || [];
+                const expiringDocs = v.expiringDocs || [];
+
+                const isMissing = missingDocs.some(d => d === docTypeFilter || d.includes(docTypeFilter));
+                const isExpired = expiringDocs.some(s => {
+                    const name = s.split(/ expired /i)[0].split(/ expires in /i)[0].trim();
+                    return name === docTypeFilter;
+                });
+                const isExpiring = expiringDocs.some(s => {
+                    if (!s.toLowerCase().includes('expires in')) return false;
+                    const name = s.split(/ expires in /i)[0].trim();
+                    return name === docTypeFilter;
+                });
+                const isExpiredOnly = expiringDocs.some(s => {
+                    if (!s.toLowerCase().includes('expired')) return false;
+                    const name = s.split(/ expired /i)[0].trim();
+                    return name === docTypeFilter;
+                });
+                const isAvailable = availableDocs.some(d =>
+                    (typeof d === 'string' ? d : d.doc_type) === docTypeFilter
+                ) && !isExpired;
+
+                if (docStateFilter === 'all') {
+                    // Vehicle must have some relation to this doc type
+                    return isMissing || isExpired || isAvailable;
+                }
+                if (docStateFilter === 'missing') return isMissing;
+                if (docStateFilter === 'expired') return isExpiredOnly;
+                if (docStateFilter === 'expiring') return isExpiring;
+                if (docStateFilter === 'ok') return isAvailable;
+                return true;
+            })
             .sort((a, b) => {
                 const { key, dir } = sortConfig;
                 const mul = dir === 'asc' ? 1 : -1;
@@ -270,7 +401,7 @@ export default function FleetDashboard() {
                 }
                 return (a[key] || '').localeCompare(b[key] || '', undefined, { numeric: true }) * mul;
             });
-    }, [baseFilteredVehicles, statusFilter, sortConfig]);
+    }, [baseFilteredVehicles, statusFilter, docTypeFilter, docStateFilter, sortConfig]);
 
     const handleRowClick = useCallback((id) => {
         setSelectedVehicle(prev => prev === id ? null : id);
@@ -329,119 +460,197 @@ export default function FleetDashboard() {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 font-sans antialiased relative transition-colors duration-300">
-            <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans antialiased">
 
-                {/* COMPACT HEADER SECTION */}
-                <header className="bg-white px-5 py-3 z-10 border-b border-slate-200 flex-shrink-0 shadow-sm transition-colors duration-300">
-                    <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            {/* ── SIDEBAR ── */}
+            <aside className="w-56 flex-shrink-0 flex flex-col bg-slate-900 text-white border-r border-slate-800">
 
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6 w-full xl:w-auto">
-                            <div className="flex items-center gap-4">
-                                <h1 className="text-xl font-black text-slate-900 tracking-tight sm:border-r border-slate-200 sm:pr-6 whitespace-nowrap">
-                                    Gestión Flota
-                                </h1>
-                            </div>
+                {/* Logo */}
+                <div className="px-5 pt-5 pb-4">
+                    <h1 className="text-sm font-black tracking-tight text-white">Gestión Flota</h1>
+                    <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-0.5">Panel de control</p>
+                </div>
 
-                            {/* STATUS CARDS KPIs */}
-                            <div className="flex flex-wrap gap-4 sm:gap-5 justify-start">
-                                <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? 'opacity-100 scale-110 drop-shadow-md' : 'opacity-60 hover:opacity-100 hover:-translate-y-0.5'}`} onClick={() => setStatusFilter('all')}>
-                                    <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-1.5 ${statusFilter === 'all' ? 'border-slate-800 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600 '}`}>
-                                        <span className="text-sm font-black">{stats.total}</span>
-                                    </div>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${statusFilter === 'all' ? 'text-slate-800 ' : 'text-slate-500 '}`}>Total</span>
-                                </div>
+                {/* Scrollable filter area */}
+                <div className="flex-1 overflow-y-auto px-3 pb-4 flex flex-col gap-4">
 
-                                <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${statusFilter === 'ok' ? 'opacity-100 scale-110 drop-shadow-md' : 'opacity-60 hover:opacity-100 hover:-translate-y-0.5'}`} onClick={() => setStatusFilter('ok')}>
-                                    <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-1.5 ${statusFilter === 'ok' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-emerald-200 bg-emerald-50 text-emerald-600 '}`}>
-                                        <span className="text-sm font-black">{stats.ok}</span>
-                                    </div>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${statusFilter === 'ok' ? 'text-emerald-700 ' : 'text-slate-500 '}`}>Vigentes</span>
-                                </div>
-
-                                <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${statusFilter === 'warning' ? 'opacity-100 scale-110 drop-shadow-md' : 'opacity-60 hover:opacity-100 hover:-translate-y-0.5'}`} onClick={() => setStatusFilter('warning')}>
-                                    <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-1.5 ${statusFilter === 'warning' ? 'border-amber-500 bg-amber-500 text-white' : 'border-amber-200 bg-amber-50 text-amber-600 '}`}>
-                                        <span className="text-sm font-black">{stats.warning}</span>
-                                    </div>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${statusFilter === 'warning' ? 'text-amber-600 ' : 'text-slate-500 '}`}>Alerta</span>
-                                </div>
-
-                                <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${statusFilter === 'critical' ? 'opacity-100 scale-110 drop-shadow-md' : 'opacity-60 hover:opacity-100 hover:-translate-y-0.5'}`} onClick={() => setStatusFilter('critical')}>
-                                    <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-1.5 ${statusFilter === 'critical' ? 'border-rose-600 bg-rose-600 text-white' : 'border-rose-200 bg-rose-50 text-rose-600 '}`}>
-                                        <span className="text-sm font-black">{stats.critical}</span>
-                                    </div>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${statusFilter === 'critical' ? 'text-rose-700 ' : 'text-slate-500 '}`}>Crítico</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* FILTERS & SEARCH */}
-                        <div className="flex flex-wrap items-center gap-3">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar ID o modelo..."
-                                    className="w-56 pl-4 pr-10 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all font-medium text-slate-700 placeholder-slate-400 shadow-sm"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                                {searchTerm && (
-                                    <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 ">
-                                        &times;
-                                    </button>
-                                )}
-                            </div>
-
-                            <select
-                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer font-medium text-slate-600 shadow-sm hover:border-slate-300 transition-colors focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none"
-                                value={unFilter}
-                                onChange={(e) => setUnFilter(e.target.value)}
-                            >
-                                <option value="all">Plaza: Todas</option>
-                                {uniqueUNs.map(un => (
-                                    <option key={un} value={un}>UN: {un}</option>
-                                ))}
-                            </select>
-
-                            <select
-                                className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer font-medium text-slate-600 shadow-sm hover:border-slate-300 transition-colors focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none"
-                                value={sysStatusFilter}
-                                onChange={(e) => setSysStatusFilter(e.target.value)}
-                            >
-                                <option value="all">Estatus SOL: Todos</option>
-                                {uniqueSysStatuses.map(status => (
-                                    <option key={status} value={status}>SOL: {status}</option>
-                                ))}
-                            </select>
-
-                            <button
-                                onClick={() => setIsUploadModalOpen(true)}
-                                className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-sm shadow-blue-600/20 hover:bg-blue-700 hover:shadow-md transition-all active:scale-95 flex items-center gap-2"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                SUBIR DOC
-                            </button>
-
-                            {/* LOGOUT BUTTON */}
-                            {auth.isAuthenticated && (
-                                <button
-                                    onClick={() => void auth.signoutRedirect()}
-                                    className="ml-2 px-3 py-2 bg-slate-100 border border-slate-200 text-slate-600 rounded-lg text-sm font-bold shadow-sm hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all flex items-center gap-2"
-                                    title="Cerrar sesión"
-                                >
-                                    <LogOut className="w-4 h-4" />
-                                </button>
-                            )}
-
-                        </div>
-
+                    {/* Search */}
+                    <div className="relative">
+                        <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" /></svg>
+                        <input
+                            type="text"
+                            placeholder="Buscar ID o modelo..."
+                            className="w-full pl-7 pr-6 py-2 bg-slate-800 border border-slate-700/60 rounded-md text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {searchTerm && (
+                            <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 leading-none text-sm">&times;</button>
+                        )}
                     </div>
+
+                    {/* Section: Vehículo */}
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 px-0.5">Vehículo</p>
+                        <select
+                            className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700/60 rounded-md text-xs text-slate-400 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                            value={unFilter}
+                            onChange={(e) => setUnFilter(e.target.value)}
+                        >
+                            <option value="all">Plaza: Todas</option>
+                            {uniqueUNs.map(un => <option key={un} value={un}>{un}</option>)}
+                        </select>
+                        <select
+                            className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700/60 rounded-md text-xs text-slate-400 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                            value={sysStatusFilter}
+                            onChange={(e) => setSysStatusFilter(e.target.value)}
+                        >
+                            <option value="all">SOL: Todos</option>
+                            {uniqueSysStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
+
+                    {/* Section: Documento */}
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 px-0.5">Documento</p>
+                        <select
+                            id="filter-doc-type"
+                            className={`w-full px-2.5 py-1.5 border rounded-md text-xs cursor-pointer focus:outline-none focus:ring-1 transition-colors ${
+                                docTypeFilter !== 'all'
+                                    ? 'bg-slate-700 border-slate-600 text-slate-200 focus:ring-slate-500'
+                                    : 'bg-slate-800 border-slate-700/60 text-slate-400 focus:ring-slate-500'
+                            }`}
+                            value={docTypeFilter}
+                            onChange={(e) => { setDocTypeFilter(e.target.value); setDocStateFilter('all'); }}
+                        >
+                            {DOC_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
+                        <select
+                            id="filter-doc-state"
+                            disabled={docTypeFilter === 'all'}
+                            className={`w-full px-2.5 py-1.5 border rounded-md text-xs cursor-pointer focus:outline-none focus:ring-1 transition-colors ${
+                                docTypeFilter === 'all'
+                                    ? 'bg-slate-800/30 border-slate-800 text-slate-700 cursor-not-allowed'
+                                    : docStateFilter !== 'all'
+                                        ? 'bg-slate-700 border-slate-600 text-slate-200 focus:ring-slate-500'
+                                        : 'bg-slate-800 border-slate-700/60 text-slate-400 focus:ring-slate-500'
+                            }`}
+                            value={docStateFilter}
+                            onChange={(e) => setDocStateFilter(e.target.value)}
+                        >
+                            {DOC_STATE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
+                        {(docTypeFilter !== 'all' || docStateFilter !== 'all') && (
+                            <button
+                                id="clear-doc-filter"
+                                onClick={() => { setDocTypeFilter('all'); setDocStateFilter('all'); }}
+                                className="flex items-center justify-center gap-1 w-full py-1.5 rounded-md border border-slate-700 text-slate-400 text-[10px] font-bold hover:bg-slate-800 transition-colors"
+                            >
+                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                                Limpiar filtro
+                            </button>
+                        )}
+                    </div>
+
+                </div>
+
+                {/* Bottom: Upload + Logout */}
+                <div className="px-3 py-3 border-t border-slate-800 flex flex-col gap-1.5">
+                    <button
+                        onClick={() => { setIsDiscrepancyView(true); setDocTypeFilter('all'); setDocStateFilter('all'); }}
+                        className={`w-full flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${
+                            isDiscrepancyView
+                                ? 'bg-rose-700/30 text-rose-300 border border-rose-700/40'
+                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-slate-700/40'
+                        }`}
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        </svg>
+                        Discrepancias
+                    </button>
+                    {isEditor && (
+                        <button
+                            onClick={() => setIsUploadModalOpen(true)}
+                            className="w-full flex items-center justify-center gap-2 py-2 bg-slate-700 text-slate-200 rounded-md text-xs font-bold hover:bg-slate-600 active:scale-95 transition-all"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                            Subir documento
+                        </button>
+                    )}
+                    {auth.isAuthenticated && (
+                        <button
+                            onClick={() => void auth.signoutRedirect()}
+                            className="w-full flex items-center justify-center gap-2 py-1.5 text-slate-600 text-[10px] font-bold uppercase tracking-widest hover:text-rose-400 transition-colors"
+                        >
+                            <LogOut className="w-3 h-3" />
+                            Cerrar sesión
+                        </button>
+                    )}
+                </div>
+            </aside>
+
+            {/* ── MAIN CONTENT ── */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+                {/* ── KPI STRIP ── */}
+                <header className="flex-shrink-0 flex items-center gap-1 px-5 py-3 bg-white border-b border-slate-100 z-10 relative">
+                    {docTypeFilter !== 'all' ? (
+                        [
+                            { label: 'Total',      value: activeStats.total,    num: 'text-slate-500'    },
+                            { label: 'Vigentes',   value: activeStats.ok,       num: 'text-emerald-600'  },
+                            { label: 'Por Vencer', value: activeStats.warning,  num: 'text-amber-500'    },
+                            { label: 'Crítico',    value: activeStats.critical, num: 'text-rose-500'     },
+                        ].map(kpi => (
+                            <div key={kpi.label} className="flex flex-col items-start px-4 py-2 min-w-[72px]">
+                                <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num}`}>{kpi.value ?? '…'}</span>
+                                <span className="text-[9px] font-bold uppercase tracking-widest mt-0.5 text-slate-400">{kpi.label}</span>
+                            </div>
+                        ))
+                    ) : (
+                        [
+                            { key: 'all',      label: 'Total',    value: stats.total,    num: 'text-slate-500',   activeBg: 'bg-slate-100'  },
+                            { key: 'ok',       label: 'Vigentes', value: stats.ok,       num: 'text-emerald-600', activeBg: 'bg-emerald-50' },
+                            { key: 'warning',  label: 'Alerta',   value: stats.warning,  num: 'text-amber-500',   activeBg: 'bg-amber-50'   },
+                            { key: 'critical', label: 'Crítico',  value: stats.critical, num: 'text-rose-500',    activeBg: 'bg-rose-50'    },
+                        ].map(kpi => {
+                            const active = statusFilter === kpi.key;
+                            return (
+                                <button
+                                    key={kpi.key}
+                                    onClick={() => setStatusFilter(kpi.key)}
+                                    className={`flex flex-col items-start px-4 py-2 rounded-lg transition-all duration-150 min-w-[72px] ${
+                                        active ? kpi.activeBg : 'hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num} ${active ? '' : 'opacity-40'}`}>{kpi.value}</span>
+                                    <span className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${active ? 'text-slate-500' : 'text-slate-400 opacity-50'}`}>{kpi.label}</span>
+                                </button>
+                            );
+                        })
+                    )}
+                    {docTypeFilter !== 'all' && (
+                        <div className="ml-auto flex items-center gap-2 pl-4 border-l border-slate-100">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vista documento</span>
+                        </div>
+                    )}
                 </header>
 
-                {/* MAIN LIST VIEW (DATA TABLE) */}
+                {/* MAIN LIST VIEW (DATA TABLE) or DOC FILTER VIEW or DISCREPANCY VIEW */}
                 <main className="flex-1 flex flex-col overflow-hidden relative">
-
-                    <div className="flex-1 w-full flex flex-col overflow-hidden relative transition-colors duration-300 bg-white">
+                    {isDiscrepancyView ? (
+                        <DiscrepancyView
+                            onClose={() => setIsDiscrepancyView(false)}
+                            vehicles={safeVehicles}
+                        />
+                    ) : docTypeFilter !== 'all' ? (
+                        <DocFilterView
+                            docType={docTypeFilter}
+                            docStateFilter={docStateFilter}
+                            onClearFilter={() => { setDocTypeFilter('all'); setDocStateFilter('all'); }}
+                        />
+                    ) : (
+                    <div className="flex-1 w-full flex flex-col overflow-hidden relative bg-white">
 
                         {/* SCROLL MINIMAL INDICATOR */}
                         <div
@@ -464,22 +673,21 @@ export default function FleetDashboard() {
                             <table className="w-full text-sm text-left relative border-collapse">
                                 <thead className="sticky top-0 z-20 bg-slate-800 text-white uppercase text-xs font-bold tracking-wider shadow-md">
                                     <tr>
-                                        <th className="px-5 py-4 w-28 rounded-tl-lg border-b border-slate-800">
+                                        <th className="px-5 py-2.5 w-28 rounded-tl-lg border-b border-slate-800">
                                             <span className="inline-flex items-center">ID Vh.<SortBtn col="id" /></span>
                                         </th>
-                                        <th className="px-4 py-4 w-36 border-b border-slate-800">
+                                        <th className="px-4 py-2.5 w-36 border-b border-slate-800">
                                             <span className="inline-flex items-center">UN (Plaza)<SortBtn col="un" /></span>
                                         </th>
-                                        <th className="px-4 py-4 w-32 border-b border-slate-800">
+                                        <th className="px-4 py-2.5 w-32 border-b border-slate-800">
                                             <span className="inline-flex items-center">Sistema SOL<SortBtn col="sysStatus" /></span>
                                         </th>
-                                        <th className="px-4 py-4 w-28 border-b border-slate-800">
+                                        <th className="px-4 py-2.5 w-28 border-b border-slate-800">
                                             <span className="inline-flex items-center">Docs<SortBtn col="status" /></span>
                                         </th>
-                                        <th className="px-5 py-4 min-w-[180px] border-b border-slate-800">Análisis</th>
-                                        <th className="px-5 py-4 w-[24%] border-b border-slate-800">Faltantes</th>
-                                        <th className="px-5 py-4 w-[28%] border-b border-slate-800">Vigencias</th>
-                                        <th className="pl-5 pr-8 py-4 w-20 text-right rounded-tr-lg border-b border-slate-800">Acción</th>
+                                        <th className="px-5 py-2.5 min-w-[180px] border-b border-slate-800">Análisis</th>
+                                        <th className="px-5 py-2.5 border-b border-slate-800">Vigencias</th>
+                                        <th className="pl-5 pr-8 py-2.5 w-20 text-right rounded-tr-lg border-b border-slate-800">Acción</th>
                                     </tr>
                                 </thead>
 
@@ -528,35 +736,44 @@ export default function FleetDashboard() {
  ${isExpanded ? 'bg-blue-50/60 shadow-[inset_4px_0_0_0_rgba(59,130,246,1)] border-b-blue-100 ' : 'hover:bg-slate-50 border-transparent hover:border-slate-200 '}`}
                                                         onClick={() => handleRowClick(vehicle.id)}
                                                     >
-                                                        <td className="px-5 py-4 align-top">
+                                                        <td className="px-5 py-2.5 align-middle">
                                                             <span className="font-extrabold text-slate-800 text-[15px]">{vehicle.id}</span>
                                                         </td>
 
-                                                        <td className="px-4 py-4 align-top">
+                                                        <td className="px-4 py-2.5 align-middle">
                                                             <span className="inline-flex items-center px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200/60 text-xs font-bold uppercase tracking-wide">
                                                                 {vehicle.un}
                                                             </span>
                                                         </td>
 
-                                                        <td className="px-4 py-4 align-top">
+                                                        <td className="px-4 py-2.5 align-middle">
                                                             <span className="inline-flex items-center px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 text-xs font-bold uppercase tracking-wide">
                                                                 {vehicle.sysStatus}
                                                             </span>
                                                         </td>
 
-                                                        <td className="px-4 py-4 align-top">
-                                                            {vehicle.status === 'critical' && <span className="inline-flex items-center px-3 py-1 rounded-md text-[11px] font-black bg-rose-100/80 text-rose-700 border border-rose-200 uppercase tracking-widest shadow-sm">CRÍTICO</span>}
-                                                            {vehicle.status === 'warning' && <span className="inline-flex items-center px-3 py-1 rounded-md text-[11px] font-black bg-amber-100/80 text-amber-700 border border-amber-200 uppercase tracking-widest shadow-sm">ALERTA</span>}
-                                                            {vehicle.status === 'ok' && <span className="inline-flex items-center px-3 py-1 rounded-md text-[11px] font-black bg-emerald-100/80 text-emerald-700 border border-emerald-200 uppercase tracking-widest shadow-sm">OK</span>}
+                                                        <td className="px-4 py-2.5 align-middle">
+                                                            {vehicle.status === 'critical' && <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold text-rose-700 border border-rose-200 uppercase tracking-widest">Crítico</span>}
+                                                            {vehicle.status === 'warning'  && <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold text-amber-700 border border-amber-200 uppercase tracking-widest">Alerta</span>}
+                                                            {vehicle.status === 'ok'       && <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold text-slate-500 border border-slate-200 uppercase tracking-widest">OK</span>}
                                                         </td>
 
-                                                        <td className="px-5 py-4 align-top">
-                                                            <div className="flex flex-nowrap gap-2 items-center mt-1">
+                                                        <td className="px-5 py-2.5 align-top">
+                                                            <div className="flex flex-nowrap gap-2 items-center pt-0.5">
                                                                 {uniqueDocNames.map((docName, idx) => {
-                                                                    const isAvailable = validDocs.some(d => (typeof d === 'string' ? d : d.doc_type) === docName);
+                                                                    const inValid    = validDocs.some(d => (typeof d === 'string' ? d : d.doc_type) === docName);
+                                                                    const expiryEntry = expiringList.find(e => extractDocName(e) === docName);
+                                                                    const isAvailable = inValid || !!expiryEntry;
+                                                                    let docSt = 'ok';
+                                                                    if (!isAvailable) {
+                                                                        docSt = 'missing';
+                                                                    } else if (expiryEntry) {
+                                                                        const parsed = parseExpirationString(expiryEntry);
+                                                                        docSt = parsed.isExpired ? 'critical' : 'warning';
+                                                                    }
                                                                     return (
                                                                         <div key={idx} title={formatTitle(docName)} className="transition-transform hover:scale-110">
-                                                                            {renderDocIcon(docName, isAvailable)}
+                                                                            {renderDocIcon(docName, isAvailable, docSt)}
                                                                         </div>
                                                                     );
                                                                 })}
@@ -564,41 +781,32 @@ export default function FleetDashboard() {
                                                             </div>
                                                         </td>
 
-                                                        <td className="px-5 py-3 align-top">
-                                                            {missingList.length > 0 ? (
-                                                                <div className="flex flex-wrap gap-1.5 pt-1">
-                                                                    {missingList.map((issue, idx) => (
-                                                                        <div key={idx} className="flex items-center gap-1.5 text-[10px] font-black uppercase text-rose-700/90 bg-white px-2 py-0.5 rounded border border-rose-200/80 w-fit max-w-full truncate shadow-sm transition-transform hover:scale-105" title={formatTitle(issue)}>
-                                                                            {formatTitle(issue)}
+                                                        <td className="px-5 py-2 align-top">
+                                                            <div className="flex flex-col gap-1 w-full max-w-[280px] pt-0.5">
+                                                                {missingList.map((issue, idx) => (
+                                                                    <div key={`m-${idx}`} className="flex items-center justify-between text-xs font-bold px-2.5 py-1 rounded border border-l-2 shadow-sm bg-white border-slate-200 border-l-slate-400 w-full max-w-[280px]">
+                                                                        <span className="truncate mr-3 text-slate-600 opacity-90" title={formatTitle(issue)}>{formatTitle(issue)}</span>
+                                                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wide whitespace-nowrap bg-slate-100 text-slate-600">Falta</span>
+                                                                    </div>
+                                                                ))}
+                                                                {expiringList.map((issue, idx) => {
+                                                                    const parsed = parseExpirationString(issue);
+                                                                    return (
+                                                                        <div key={`e-${idx}`} className={`flex items-center justify-between text-xs font-bold px-2.5 py-1 rounded border border-l-2 shadow-sm ${parsed.isExpired ? 'text-rose-800 bg-white border-rose-200 border-l-rose-500' : 'text-amber-800 bg-white border-amber-200 border-l-amber-500'}`}>
+                                                                            <span className="truncate mr-3 opacity-90" title={parsed.docName}>{parsed.docName}</span>
+                                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wide whitespace-nowrap ${parsed.isExpired ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                                                                                {parsed.timeText}
+                                                                            </span>
                                                                         </div>
-                                                                    ))}
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-slate-300 italic text-[11px] mt-1 inline-block">-</span>
-                                                            )}
+                                                                    );
+                                                                })}
+                                                                {missingList.length === 0 && expiringList.length === 0 && (
+                                                                    <span className="text-slate-300 italic text-[11px]">-</span>
+                                                                )}
+                                                            </div>
                                                         </td>
 
-                                                        <td className="px-5 py-3 align-top">
-                                                            {expiringList.length > 0 ? (
-                                                                <div className="flex flex-col gap-1 w-full max-w-[240px]">
-                                                                    {expiringList.map((issue, idx) => {
-                                                                        const parsed = parseExpirationString(issue);
-                                                                        return (
-                                                                            <div key={idx} className={`flex items-center justify-between text-xs font-bold px-2.5 py-1 rounded border border-l-2 shadow-sm ${parsed.isExpired ? 'text-rose-800 bg-white border-rose-200 border-l-rose-500 ' : 'text-amber-800 bg-white border-amber-200 border-l-amber-500 '}`}>
-                                                                                <span className="truncate mr-3 opacity-90" title={parsed.docName}>{parsed.docName}</span>
-                                                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wide whitespace-nowrap ${parsed.isExpired ? 'bg-rose-100 text-rose-800 ' : 'bg-amber-100 text-amber-800 '}`}>
-                                                                                    {parsed.timeText}
-                                                                                </span>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-slate-300 italic text-[11px] mt-1 inline-block">-</span>
-                                                            )}
-                                                        </td>
-
-                                                        <td className="pl-5 pr-8 py-4 text-right align-middle">
+                                                        <td className="pl-5 pr-8 py-2 text-right align-middle">
                                                             <button
                                                                 onClick={(e) => handleDownloadVehicle(e, vehicle.id)}
                                                                 disabled={!!downloadingVehicleId}
@@ -635,6 +843,7 @@ export default function FleetDashboard() {
                                                                             activeTab={activeTab}
                                                                             onTabChange={setActiveTab}
                                                                             onClose={() => setSelectedVehicle(null)}
+                                                                            autoOpenReviewTrigger={autoOpenReviewTrigger}
                                                                         />
                                                                     </div>
                                                                 </div>
@@ -661,6 +870,7 @@ export default function FleetDashboard() {
                             </table>
                         </div>
                     </div>
+                    )}
                 </main>
             </div>
 
@@ -676,9 +886,24 @@ export default function FleetDashboard() {
                                     <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>
                                 </div>
                                 <h2 className="text-2xl font-black text-white mb-2">¡Subida Exitosa!</h2>
-                                <p className="text-emerald-100 font-medium">
+                                <p className="text-emerald-100 font-medium mb-8">
                                     {uploadFiles.length > 1 ? `${uploadFiles.length} documentos guardados correctamente.` : 'El documento ha sido guardado.'}
                                 </p>
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={handleStartValidation}
+                                        className="px-6 py-3 bg-white text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 active:scale-95 transition-all shadow-md flex items-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                                        Validar Documentos
+                                    </button>
+                                    <button 
+                                        onClick={resetUploadModal}
+                                        className="px-6 py-3 bg-emerald-600/50 text-white rounded-xl font-bold hover:bg-emerald-600/70 active:scale-95 transition-all border border-emerald-400/30"
+                                    >
+                                        Cerrar
+                                    </button>
+                                </div>
                             </div>
                         ) : uploadPhase === 'uploading' ? (
                             <div className="flex flex-col min-h-[320px]">
@@ -690,7 +915,7 @@ export default function FleetDashboard() {
                                     {uploadFiles.map((f) => {
                                         const fs = fileStatuses[f.name] || { status: 'processing', docType: '' };
                                         const isDone = fs.status === 'completed';
-                                        const isError = fs.status === 'error';
+                                        const isError = ['error', 'unclassified', 'no_result'].includes(fs.status);
                                         const isClassified = fs.status === 'classified';
                                         return (
                                             <div key={f.name} className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${isDone ? 'bg-emerald-50 border-emerald-200' :
@@ -722,7 +947,7 @@ export default function FleetDashboard() {
                                                                 'text-slate-400'
                                                         }`}>
                                                         {isDone ? `✓ ${formatTitle(fs.docType) || 'Completado'}` :
-                                                            isError ? 'Error al procesar' :
+                                                            isError ? `Error: ${fs.errorMsg || 'Error al procesar'}` :
                                                                 isClassified ? `Identificado: ${formatTitle(fs.docType)}` :
                                                                     'Analizando...'}
                                                     </p>
@@ -829,10 +1054,9 @@ export default function FleetDashboard() {
                                                     });
                                                 }}
                                                 className={`flex-1 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-4 cursor-pointer transition-all duration-200 select-none
-                                                    ${
-                                                        isDragging
-                                                            ? 'border-blue-500 bg-blue-50 scale-[1.01]'
-                                                            : uploadFiles.length > 0
+                                                    ${isDragging
+                                                        ? 'border-blue-500 bg-blue-50 scale-[1.01]'
+                                                        : uploadFiles.length > 0
                                                             ? 'border-blue-300 bg-blue-50/40'
                                                             : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/50'
                                                     }
@@ -916,6 +1140,19 @@ export default function FleetDashboard() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {isSessionReviewOpen && (
+                <DocumentReviewModal 
+                    docs={sessionReviewDocs} 
+                    onClose={() => {
+                        setIsSessionReviewOpen(false);
+                        resetUploadModal();
+                    }}
+                    onSuccess={() => {
+                        queryClientInstance.invalidateQueries({ queryKey: ['fleet_merged'] });
+                    }}
+                />
             )}
         </div>
     );

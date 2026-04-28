@@ -8,20 +8,28 @@ from ..llms.config import (
 from langchain.messages import HumanMessage
 from pydantic import BaseModel, Field
 from ..file2base64 import _file2base64
+from ..prompt_loader import load_prompt
 
 date_format = "%d/%m/%Y"
 
 
 class InsurancePol(BaseModel):
     issue_date: str = Field(
-        description=f"Date of issue of the document in format {date_format}"
+        description=f"Start date of coverage in format {date_format}"
     )
     expiration_date: str = Field(
-        description=f"Expiration date of the document in format {date_format}"
+        description=f"Expiration date of the policy in format {date_format}"
     )
-    insurance_company: str = Field(description="Insurance company")
-    policy: str = Field(description="Policy")
-    paragraph: str = Field(description="Policy Paragraph")
+    insurance_company: str = Field(description="Full name of the insurance company")
+    policy: str = Field(description="Policy number")
+    paragraph: str = Field(description="Policy paragraph or section (Inciso)")
+    confidence_score: float = Field(
+        description="Confidence score between 0.0 and 100.0 indicating how clearly and accurately the data was extracted from the document."
+    )
+    extraction_notes: str = Field(
+        description="Any notes, warnings, or anomalies found during extraction (e.g. 'Document is blurry, VIN is hard to read'). Leave empty if everything is clear.",
+        default=""
+    )
 
 
 def insurance_pol_analysis(state: ClassifiedDocState):
@@ -32,14 +40,7 @@ def insurance_pol_analysis(state: ClassifiedDocState):
         content=[
             {
                 "type": "text",
-                "text": f"""You are an expert OCR for an Insurance Policy in spanish.
-Analize the image and extract:
-- issue date (when the policy begin to apply) in format {date_format}
-- policy expiration date in format {date_format}
-- insurance company
-- policy
-- paragraph (inciso)
-""",
+                "text": load_prompt("insurance_pol", date_format=date_format),
             },
             {
                 "type": type,
@@ -57,41 +58,7 @@ Analize the image and extract:
         .with_structured_output(InsurancePol)
         .invoke([messages])
     )
-    # OLLAMA
-    #
-    #     if file_path.suffix == ".pdf":
-    #         encoded_string = _convert_pdf_to_base64_image(file_path)
-    #         image_data = f"data:image/png;base64,{encoded_string}"
-    #     else:
-    #         with open(file_path, "rb") as image_file:
-    #             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-    #             image_data = f"data:image/jpeg;base64,{encoded_string}"
 
-    #     messages = [
-    #         SystemMessage(
-    #             content="""You are an expert document classifier for an armored vehicle.
-    # Analyze deeply the image and determine its type.
-    # For a Gas Safety Certificate, Gas Inspection Report, Gas Compliance Certificate return 'dictamen_gas'.
-    # For a vehicle registration card return 'tarjeta_circulacion.
-    # For a insurance policy return 'poliza_seguro'
-    # If the document does not correspond to any of the above you HAVE to return 'unknown'
-
-    # IMPORTANT!
-    # You must respond ONLY with a raw JSON object and nothing else. No markdown, no explanations.
-    # The JSON must have this exact structure:
-    # {"document": "dictamen_gas" | "tarjeta_circulacion" | "poliza_seguro" | "certificacion_blindaje" | "unknown"}
-    # """
-    #         ),
-    #         HumanMessage(content=[{"type": "image_url", "image_url": image_data}]),
-    #     ]
-
-    #     response = (
-    #         ChatOllama(model="ministral-3:3b", temperature=0, format="json")
-    #         .with_structured_output(DocumentOCR)
-    #         .invoke(messages)
-    #     )
-
-    # response is now a DocumentOCR instance
     return {
         "final_results": [
             {

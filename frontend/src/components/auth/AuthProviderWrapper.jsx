@@ -5,7 +5,7 @@ const oidcConfig = {
   authority: import.meta.env.VITE_AUTHENTIK_AUTHORITY,
   client_id: import.meta.env.VITE_AUTHENTIK_CLIENT_ID,
   redirect_uri: import.meta.env.VITE_AUTHENTIK_REDIRECT_URI,
-  // scope: 'openid profile email', // Default is usually fine
+  scope: 'openid profile email', 
   onSigninCallback: (_user) => {
     // Remove code and state from URL after successful login
     window.history.replaceState(

@@ -8,6 +8,8 @@ from ..llms.config import (
 from langchain.messages import HumanMessage
 from pydantic import BaseModel, Field
 from ..file2base64 import _file2base64
+from ..prompt_loader import load_prompt
+from ..types import VinStr
 
 date_format = "%d/%m/%Y"
 
@@ -17,28 +19,30 @@ class GasDictamen(BaseModel):
         description=f"Date of issue of the document in format {date_format}"
     )
     location: str = Field(
-        description="COMPLETE document issuance location not to be confused with owner's location"
+        description="COMPLETE issuance address/location of the verification center"
     )
-    serial_number: str = Field(description="Serial number of the vehicle")
-    approved: bool = Field(description="If the vehicle passed the inspection")
+    serial_number: VinStr = Field(
+        description="VIN/Serial number of the vehicle — exactly 17 alphanumeric characters"
+    )
+    approved: bool = Field(description="True if the vehicle passed the inspection")
+    confidence_score: float = Field(
+        description="Confidence score between 0.0 and 100.0 indicating how clearly and accurately the data was extracted from the document."
+    )
+    extraction_notes: str = Field(
+        description="Any notes, warnings, or anomalies found during extraction (e.g. 'Document is blurry, VIN is hard to read'). Leave empty if everything is clear.",
+        default=""
+    )
 
 
 def dictamen_gas_analysis(state: ClassifiedDocState):
     file_path = state["file_path"]
-    # Gemini
     file_base64, type, mime_type = _file2base64(file_path)
 
     messages = HumanMessage(
         content=[
             {
                 "type": "text",
-                "text": f"""You are an expert OCR for an Gas Compliance Certificate in spanish.
-Analyze the image and extract:
-- issue date in format {date_format}
-- Complete issuance location/direction.
-- Serial number of the vehicle 
-- if the vehicle passed the inspection (true or false)
-""",
+                "text": load_prompt("dictamen_gas", date_format=date_format),
             },
             {
                 "type": type,
@@ -56,41 +60,7 @@ Analyze the image and extract:
         .with_structured_output(GasDictamen)
         .invoke([messages])
     )
-    # OLLAMA
-    #
-    #     if file_path.suffix == ".pdf":
-    #         encoded_string = _convert_pdf_to_base64_image(file_path)
-    #         image_data = f"data:image/png;base64,{encoded_string}"
-    #     else:
-    #         with open(file_path, "rb") as image_file:
-    #             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-    #             image_data = f"data:image/jpeg;base64,{encoded_string}"
 
-    #     messages = [
-    #         SystemMessage(
-    #             content="""You are an expert document classifier for an armored vehicle.
-    # Analyze deeply the image and determine its type.
-    # For a Gas Safety Certificate, Gas Inspection Report, Gas Compliance Certificate return 'dictamen_gas'.
-    # For a vehicle registration card return 'tarjeta_circulacion.
-    # For a insurance policy return 'poliza_seguro'
-    # If the document does not correspond to any of the above you HAVE to return 'unknown'
-
-    # IMPORTANT!
-    # You must respond ONLY with a raw JSON object and nothing else. No markdown, no explanations.
-    # The JSON must have this exact structure:
-    # {"document": "dictamen_gas" | "tarjeta_circulacion" | "poliza_seguro" | "certificacion_blindaje" | "unknown"}
-    # """
-    #         ),
-    #         HumanMessage(content=[{"type": "image_url", "image_url": image_data}]),
-    #     ]
-
-    #     response = (
-    #         ChatOllama(model="ministral-3:3b", temperature=0, format="json")
-    #         .with_structured_output(DocumentOCR)
-    #         .invoke(messages)
-    #     )
-
-    # response is now a DocumentOCR instance
     return {
         "final_results": [
             {

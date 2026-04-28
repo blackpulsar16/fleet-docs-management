@@ -9,21 +9,24 @@ def sync_node(state: SingleFileState):
     return {}
 
 def route_to_specialized_ocr(state: SingleFileState):
-    doc = state["classified_docs"][0]
-    doc_type = doc["doc_type"]
+    if not state.get("classified_docs"):
+        return END
 
-    if doc_type == "unknown":
-        return "unknown"
-    elif doc_type == "dictamen_gas":
-        return Send("dictamen_gas_analysis",doc)
+    doc = state["classified_docs"][0]
+    doc_type = doc.get("doc_type")
+
+    if doc_type == "dictamen_gas":
+        return Send("dictamen_gas_analysis", doc)
     elif doc_type == "tarjeta_circulacion_front":
-        return Send("circulation_card_analysis",doc)
+        return Send("circulation_card_analysis", doc)
     elif doc_type == "poliza_seguro":
-        return Send("insurance_pol_analysis",doc)
+        return Send("insurance_pol_analysis", doc)
     elif doc_type == "certificacion_blindaje":
-        return Send("armor_cert_analysis",doc)
+        return Send("armor_cert_analysis", doc)
     elif doc_type == "bill_make":
-        return Send("bill_analysis",doc)
+        return Send("bill_analysis", doc)
+
+    return END
 
 
 class SingleFileAgent:
@@ -48,7 +51,8 @@ class SingleFileAgent:
                 "circulation_card_analysis",
                 "insurance_pol_analysis",
                 "armor_cert_analysis",
-                "bill_analysis"
+                "bill_analysis",
+                END
             ],
         )
         graph.add_edge("dictamen_gas_analysis", END)

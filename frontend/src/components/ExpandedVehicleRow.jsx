@@ -3,14 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { formatTitle, formatSpecValue, getDocStatus } from '../utils/helpers.jsx';
 import { FLEET_API, SOL_API } from '../config/api.js';
 import { useApiClient } from '../hooks/useApiClient.js';
+import DocumentReviewModal from './DocumentReviewModal.jsx';
 
-export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, onClose }) {
+export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, onClose, autoOpenReviewTrigger = 0 }) {
     const [viewingDoc, setViewingDoc] = useState(null);
     const [viewerScale, setViewerScale] = useState(1);
     const [viewerRotation, setViewerRotation] = useState(0);
+    const [hasAttemptedAutoOpen, setHasAttemptedAutoOpen] = useState(0);
     const { fetchWithAuth } = useApiClient();
 
-    const { data: docs = [], isLoading: isLoadingDocs } = useQuery({
+    const { data: docs = [], isLoading: isLoadingDocs, refetch: refetchDocs } = useQuery({
         queryKey: ['documents', vehicle?.id],
         queryFn: async () => {
             if (!vehicle?.id) return [];
@@ -19,8 +21,24 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
             const data = await response.json();
             return Array.isArray(data.documents) ? data.documents : [];
         },
-        enabled: activeTab === 'docs' && !!vehicle?.id,
+        enabled: (activeTab === 'docs' || activeTab === 'validation') && !!vehicle?.id,
     });
+
+    React.useEffect(() => {
+        if (autoOpenReviewTrigger > hasAttemptedAutoOpen && !isLoadingDocs && docs.length > 0) {
+            setHasAttemptedAutoOpen(autoOpenReviewTrigger);
+            
+            // Priority: pending_review -> critical -> warning -> first doc
+            const docToReview = docs.find(d => d.status === 'pending_review')
+                || docs.find(d => getDocStatus(d) === 'critical')
+                || docs.find(d => getDocStatus(d) === 'warning')
+                || docs[0];
+                
+            if (docToReview) {
+                setViewingDoc(docToReview);
+            }
+        }
+    }, [autoOpenReviewTrigger, hasAttemptedAutoOpen, isLoadingDocs, docs]);
 
     const { data: specs = null, isLoading: isLoadingSpecs } = useQuery({
         queryKey: ['specs', vehicle?.id],
@@ -30,7 +48,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
             if (!response.ok) return null;
             return response.json();
         },
-        enabled: activeTab === 'spec' && !!vehicle?.id,
+        enabled: (activeTab === 'spec' || activeTab === 'validation') && !!vehicle?.id,
     });
 
     const renderValue = useCallback((value) => {
@@ -117,8 +135,11 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
 
                         let cardStyle = "border-slate-200 hover:border-blue-300 hover:shadow-md bg-white ";
                         let badge = <span className="bg-emerald-100/80 text-emerald-800 px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-widest border border-emerald-200/50 backdrop-blur-sm shadow-sm">OK</span>;
-
-                        if (docStatus === 'critical') {
+                        
+                        if (doc.status === 'pending_review') {
+                            cardStyle = "border-amber-300 shadow-[0_4px_12px_-4px_rgba(217,119,6,0.2)] hover:border-amber-400 bg-amber-50/30 ";
+                            badge = <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-widest border border-amber-300 shadow-sm flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>PENDIENTE</span>;
+                        } else if (docStatus === 'critical') {
                             cardStyle = "border-rose-300 shadow-[0_4px_12px_-4px_rgba(225,29,72,0.2)] hover:border-rose-400 bg-white ";
                             badge = <span className="bg-rose-500 text-white px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-widest shadow-md">CRÍTICO</span>;
                         } else if (docStatus === 'warning') {
@@ -183,11 +204,11 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 </div>
 
                                 <div className="flex flex-col flex-1 justify-between mb-5">
-                                    <div className="flex flex-col gap-y-2 mb-4 mt-2">
+                                    <div className="flex flex-col gap-y-3 mb-4 mt-2">
                                         {Object.entries(doc.data || {}).filter(([_, val]) => typeof val !== 'object' || val === null).map(([key, value]) => (
-                                            <div key={key} className="flex flex-row justify-between items-baseline gap-x-3 w-full border-b border-slate-100/60 pb-2 last:border-0 last:pb-0">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate shrink-0 max-w-[45%]" title={formatTitle(key)}>{formatTitle(key)}</span>
-                                                <div className="text-right text-[13px] font-bold text-slate-700 break-words leading-tight grow">
+                                            <div key={key} className="flex flex-col w-full border-b border-slate-100/60 pb-2.5 last:border-0 last:pb-0">
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-0.5" title={formatTitle(key)}>{formatTitle(key)}</span>
+                                                <div className="text-[13px] font-bold text-slate-700 break-words leading-snug">
                                                     {renderValue(value)}
                                                 </div>
                                             </div>
@@ -357,6 +378,241 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
         );
     };
 
+    // ── VALIDATION TAB ──────────────────────────────────────────────────────
+    const renderValidationTab = () => {
+        const isLoading = isLoadingDocs || isLoadingSpecs;
+
+        if (isLoading) {
+            return (
+                <div className="pt-4 flex flex-col gap-4 animate-pulse">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="h-28 bg-slate-100 rounded-xl border border-slate-200" />
+                    ))}
+                </div>
+            );
+        }
+
+        // Index docs by type for easy access
+        const docByType = {};
+        docs.forEach(d => { if (d?.doc_type) docByType[d.doc_type] = d?.data || {}; });
+
+        const bill   = docByType['bill_make']                   || null;
+        const tarj   = docByType['tarjeta_circulacion_front']   || null;
+        const blind  = docByType['certificacion_blindaje']      || null;
+        const gas    = docByType['dictamen_gas']                || null;
+        const sol    = specs || null;
+
+        // Helper: normalize for comparison
+        const norm = (v) => String(v ?? '').trim().toUpperCase().replace(/\s+/g, ' ');
+        const val  = (v) => (v != null && String(v).trim() !== '' && String(v).trim().toLowerCase() !== 'null')
+            ? String(v).trim() : null;
+
+        // Field definitions: each field has a groundTruth source and N comparisons
+        // gtVal: value from ground truth source (Carta Factura preferred)
+        // comparisons: [{ label, value }]
+        const FIELDS = [
+            {
+                label: 'NIV / Serie', icon: '🔑',
+                gtLabel: bill ? '📄 Carta Factura' : (sol ? '🖥 SOL' : '—'),
+                gtVal: val(bill?.vehicle_info?.niv ?? bill?.niv)
+                    ?? val(sol?.Serie),
+                comparisons: [
+                    { label: '📄 Carta Factura',  value: val(bill?.vehicle_info?.niv ?? bill?.niv) },
+                    { label: '🪪 Tarjeta Circ.',  value: val(tarj?.niv) },
+                    { label: '🛡 Cert. Blindaje',  value: val(blind?.vehicle_info?.niv ?? blind?.niv) },
+                    { label: '⛽ Dict. Gas',       value: val(gas?.serial_number) },
+                    { label: '🖥 SOL',             value: val(sol?.Serie) },
+                ],
+            },
+            {
+                label: 'Placa', icon: '🪪',
+                gtLabel: bill ? '📄 Carta Factura' : (tarj ? '🪪 Tarjeta Circ.' : (sol ? '🖥 SOL' : '—')),
+                gtVal: val(bill?.placa)
+                    ?? val(tarj?.placa)
+                    ?? val(sol?.Placas),
+                comparisons: [
+                    { label: '📄 Carta Factura', value: val(bill?.placa) },
+                    { label: '🪪 Tarjeta Circ.', value: val(tarj?.placa) },
+                    { label: '🖥 SOL',            value: val(sol?.Placas) },
+                ],
+            },
+            {
+                label: 'Marca', icon: '🏭',
+                gtLabel: bill ? '📄 Carta Factura' : (sol ? '🖥 SOL' : '—'),
+                gtVal: val(bill?.vehicle_info?.make ?? bill?.make)
+                    ?? val(sol?.Marca),
+                comparisons: [
+                    { label: '📄 Carta Factura',  value: val(bill?.vehicle_info?.make ?? bill?.make) },
+                    { label: '🛡 Cert. Blindaje',  value: val(blind?.vehicle_info?.make ?? blind?.make) },
+                    { label: '🖥 SOL',             value: val(sol?.Marca) },
+                ],
+            },
+            {
+                label: 'Modelo (año)', icon: '📅',
+                gtLabel: bill ? '📄 Carta Factura' : (sol ? '🖥 SOL' : '—'),
+                gtVal: val(bill?.vehicle_info?.model ?? bill?.model)
+                    ?? val(sol?.Modelo),
+                comparisons: [
+                    { label: '📄 Carta Factura',  value: val(bill?.vehicle_info?.model ?? bill?.model) },
+                    { label: '🛡 Cert. Blindaje',  value: val(blind?.vehicle_info?.model ?? blind?.model) },
+                    { label: '🖥 SOL',             value: val(sol?.Modelo) },
+                ],
+            },
+            {
+                label: 'Serie del Motor', icon: '⚙️',
+                gtLabel: bill ? '📄 Carta Factura' : (sol ? '🖥 SOL' : '—'),
+                gtVal: val(bill?.vehicle_info?.motor_serial_numer)
+                    ?? val(sol?.['NUM MOTOR']),
+                comparisons: [
+                    { label: '📄 Carta Factura', value: val(bill?.vehicle_info?.motor_serial_numer) },
+                    { label: '🖥 SOL',            value: val(sol?.['NUM MOTOR']) },
+                ],
+            },
+            {
+                label: 'Empresa Blindadora', icon: '🛡️',
+                gtLabel: blind ? '🛡 Cert. Blindaje' : (sol ? '🖥 SOL' : '—'),
+                gtVal: val(blind?.armoring_company)
+                    ?? val(sol?.BLINDADORA),
+                comparisons: [
+                    { label: '🛡 Cert. Blindaje', value: val(blind?.armoring_company) },
+                    { label: '🖥 SOL',             value: val(sol?.BLINDADORA) },
+                ],
+            },
+        ];
+
+        const statusConfig = {
+            ok:       { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', label: 'COINCIDE',     icon: '✓' },
+            mismatch: { bg: 'bg-rose-50',    border: 'border-rose-300',    badge: 'bg-rose-100 text-rose-700 border-rose-200',         label: 'DISCREPANCIA', icon: '✕' },
+            partial:  { bg: 'bg-amber-50',   border: 'border-amber-200',   badge: 'bg-amber-100 text-amber-700 border-amber-200',       label: 'PARCIAL',      icon: '⚠' },
+            missing:  { bg: 'bg-slate-50',   border: 'border-slate-200',   badge: 'bg-slate-100 text-slate-500 border-slate-200',       label: 'SIN DATOS',    icon: '—' },
+        };
+
+        const getCardStatus = (gtVal, comparisons) => {
+            const available = comparisons.filter(c => c.value != null);
+            if (available.length === 0) return 'missing';
+            if (available.length === 1) return 'partial';
+            const gt = gtVal;
+            const hasMismatch = available.some(c => c.value != null && gt != null && norm(c.value) !== norm(gt));
+            if (hasMismatch) return 'mismatch';
+            return 'ok';
+        };
+
+        const rows = FIELDS.map(f => ({
+            ...f,
+            cardStatus: getCardStatus(f.gtVal, f.comparisons),
+        }));
+
+        const mismatches = rows.filter(r => r.cardStatus === 'mismatch').length;
+        const allOk      = mismatches === 0 && rows.every(r => r.cardStatus !== 'missing');
+
+        return (
+            <div className="pt-4 animate-in fade-in duration-500 flex flex-col gap-5">
+
+                {/* Summary Banner */}
+                <div className={`flex items-center gap-4 px-5 py-4 rounded-xl border ${
+                    mismatches > 0
+                        ? 'bg-rose-50 border-rose-200'
+                        : allOk
+                            ? 'bg-emerald-50 border-emerald-200'
+                            : 'bg-amber-50 border-amber-200'
+                }`}>
+                    <span className="text-2xl">
+                        {mismatches > 0 ? '🚨' : allOk ? '✅' : '⚠️'}
+                    </span>
+                    <div className="flex flex-col">
+                        <span className={`text-sm font-black tracking-wide ${
+                            mismatches > 0 ? 'text-rose-800' : allOk ? 'text-emerald-800' : 'text-amber-800'
+                        }`}>
+                            {mismatches > 0
+                                ? `${mismatches} discrepancia${mismatches > 1 ? 's' : ''} detectada${mismatches > 1 ? 's' : ''}`
+                                : allOk
+                                    ? 'Todos los campos coinciden'
+                                    : 'Algunos campos tienen fuente única'
+                            }
+                        </span>
+                        <span className="text-xs text-slate-500 mt-0.5">
+                            Fuente de verdad: <strong>Carta Factura</strong> · Fallback: SOL
+                            {!bill && <span className="ml-2 text-amber-600 font-bold">⚠ Sin Carta Factura — usando SOL</span>}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Field comparison cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {rows.map(({ label, icon, gtLabel, gtVal, comparisons, cardStatus }) => {
+                        const cfg = statusConfig[cardStatus] ?? statusConfig.missing;
+                        return (
+                            <div key={label} className={`flex flex-col p-5 rounded-xl border ${cfg.bg} ${cfg.border} transition-all duration-200`}>
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="flex items-center gap-2 text-xs font-black text-slate-600 uppercase tracking-widest">
+                                        <span>{icon}</span>{label}
+                                    </span>
+                                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wide border ${cfg.badge}`}>
+                                        {cfg.icon} {cfg.label}
+                                    </span>
+                                </div>
+
+                                {/* Ground truth value */}
+                                <div className="mb-3 p-3 rounded-lg bg-white/80 border border-white shadow-sm">
+                                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                        Valor usado · {gtLabel}
+                                    </div>
+                                    <div className="text-[15px] font-black text-slate-800 font-mono tracking-wide break-all">
+                                        {gtVal ?? <span className="text-slate-400 italic font-normal text-sm">Sin datos</span>}
+                                    </div>
+                                </div>
+
+                                {/* All sources */}
+                                <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${Math.min(comparisons.length, 3)}, minmax(0, 1fr))` }}>
+                                    {comparisons.map(({ label: srcLabel, value }) => {
+                                        const isMismatch = value != null && gtVal != null && norm(value) !== norm(gtVal);
+                                        return (
+                                            <div key={srcLabel} className={`flex flex-col p-2 rounded-lg border ${
+                                                isMismatch
+                                                    ? 'bg-rose-50/80 border-rose-200'
+                                                    : value != null
+                                                        ? 'bg-white/60 border-slate-200/60'
+                                                        : 'bg-slate-50/40 border-slate-100'
+                                            }`}>
+                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-tight">{srcLabel}</span>
+                                                <span className={`text-[11px] font-bold break-all leading-snug ${
+                                                    isMismatch ? 'text-rose-700' : value != null ? 'text-slate-700' : 'text-slate-300 italic font-normal'
+                                                }`}>
+                                                    {value ?? 'Sin dato'}
+                                                    {isMismatch && <span className="ml-1 text-rose-500">✕</span>}
+                                                    {!isMismatch && value != null && <span className="ml-1 text-emerald-500">✓</span>}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {cardStatus === 'mismatch' && (
+                                    <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-rose-700 bg-rose-100/60 px-3 py-1.5 rounded-lg border border-rose-200">
+                                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                        </svg>
+                                        Discrepancia detectada entre fuentes. Verificar manualmente.
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Legend */}
+                <div className="flex flex-wrap gap-3 pt-1">
+                    {Object.entries(statusConfig).map(([key, cfg]) => (
+                        <div key={key} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-bold ${cfg.badge}`}>
+                            <span>{cfg.icon}</span> {cfg.label}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="w-full relative">
             <div className="flex justify-between items-end border-b-2 border-slate-200/50 mb-4">
@@ -375,6 +631,18 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         FICHA TÉCNICA (SOL)
                         {activeTab === 'spec' && <div className="absolute -bottom-[2px] left-0 right-0 h-[3px] bg-blue-600 rounded-t-full shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>}
                     </button>
+                    <button
+                        className={`pb-3 text-xs font-black tracking-widest relative transition-colors flex items-center gap-1.5 ${
+                            activeTab === 'validation' ? 'text-violet-600' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                        onClick={() => onTabChange('validation')}
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        VALIDACIÓN
+                        {activeTab === 'validation' && <div className="absolute -bottom-[2px] left-0 right-0 h-[3px] bg-violet-600 rounded-t-full shadow-[0_0_8px_rgba(124,58,237,0.4)]"></div>}
+                    </button>
                 </div>
 
                 <button
@@ -385,126 +653,19 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                 </button>
             </div>
 
-            {activeTab === 'docs' ? renderDocsTab() : renderSpecsTab()}
+            {activeTab === 'docs' ? renderDocsTab() : activeTab === 'spec' ? renderSpecsTab() : renderValidationTab()}
 
             {/* DOCUMENT VIEWER MODAL */}
             {viewingDoc && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex flex-col md:flex-row p-4 md:p-6 gap-6 animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-4 duration-300 ease-out">
-                    <div className="flex-1 bg-slate-950 rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden relative flex flex-col">
-                        <div className="px-5 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-900 shrink-0 z-20 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
-                                <h4 className="text-slate-200 font-bold tracking-wide text-sm truncate max-w-[200px] md:max-w-xs">{formatTitle(viewingDoc.doc_type)}</h4>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <a href={viewingDoc.file_url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700">
-                                    <span>ABRIR EXTERNO</span>
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                </a>
-                                <button onClick={() => setViewingDoc(null)} className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-rose-500 hover:text-white transition-colors">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 w-full relative overflow-hidden flex items-center justify-center group bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNic+PHJlY3Qgd2lkdGg9JzE2JyBoZWlnaHQ9JzE2JyBmaWxsPScjMWUxZTI0Jy8+PHJlY3QgeD0nMCcgeT0nMCcgd2lkdGg9JzgnIGhlaWdodD0nOCcgZmlsbD0nIzIzMjQyYicvPjxyZWN0IHg9JzgnIHk9JzgnIHdpZHRoPSc4JyBoZWlnaHQ9JzgnIGZpbGw9JyMyMzI0MmInLz48L3N2Zz4=')]">
-
-                            {/* IMAGE CONTROLS */}
-                            {viewingDoc.file_url?.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) && (
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-slate-700/80 shadow-[0_8px_30px_rgb(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0">
-                                    <button onClick={() => setViewerScale(s => Math.max(0.5, s - 0.25))} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Alejar">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
-                                    </button>
-                                    <span className="text-[11px] font-mono font-bold text-slate-300 w-12 text-center select-none">{Math.round(viewerScale * 100)}%</span>
-                                    <button onClick={() => setViewerScale(s => Math.min(4, s + 0.25))} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Acercar">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                                    </button>
-                                    <div className="w-px h-6 bg-slate-700 mx-1"></div>
-                                    <button onClick={() => setViewerRotation(r => r - 90)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Rotar izquierda">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-                                    </button>
-                                    <button onClick={() => setViewerRotation(r => r + 90)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Rotar derecha">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
-                                    </button>
-                                    <div className="w-px h-6 bg-slate-700 mx-1"></div>
-                                    <button onClick={() => { setViewerScale(1); setViewerRotation(0); }} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Restaurar zoom">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="w-full h-full absolute inset-0 overflow-auto custom-scrollbar flex items-center justify-center p-4">
-                                {viewingDoc.file_url?.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
-                                    <img
-                                        src={viewingDoc.file_url}
-                                        alt={viewingDoc.doc_type}
-                                        style={{
-                                            transform: `scale(${viewerScale}) rotate(${viewerRotation}deg)`,
-                                            transition: 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)'
-                                        }}
-                                        className="max-w-full max-h-full object-contain origin-center ring-1 ring-white/10 shadow-2xl rounded"
-                                    />
-                                ) : (
-                                    <iframe
-                                        src={viewingDoc.file_url}
-                                        className="w-full h-full border-0 absolute inset-0 bg-white"
-                                        title="Visor PDF"
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 bg-slate-50 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/60">
-                        <div className="px-6 py-5 border-b border-slate-200 flex justify-between items-center bg-white z-10 shadow-sm">
-                            <h3 className="text-lg font-black text-slate-800 tracking-tight truncate pr-4" title={formatTitle(viewingDoc.doc_type)}>
-                                {formatTitle(viewingDoc.doc_type)}
-                            </h3>
-                            <button
-                                onClick={() => setViewingDoc(null)}
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 transition-colors shrink-0"
-                                title="Cerrar visor"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                            <h4 className="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Datos de validación (OCR)
-                            </h4>
-
-                            <div className="flex flex-col gap-y-3 mb-6 bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm">
-                                {Object.entries(viewingDoc.data || {}).filter(([_, val]) => typeof val !== 'object' || val === null).map(([key, value]) => (
-                                    <div key={key} className="flex flex-col w-full border-b border-slate-100/60 pb-2.5 last:border-0 last:pb-0">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1" title={formatTitle(key)}>{formatTitle(key)}</span>
-                                        <div className="text-[13px] font-bold text-slate-700 break-words leading-snug w-full">
-                                            {renderValue(value)}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {Object.entries(viewingDoc.data || {}).filter(([_, val]) => typeof val === 'object' && val !== null).map(([key, value]) => (
-                                <div key={key} className="flex flex-col w-full mb-6 bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm">
-                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2 flex items-center gap-2" title={formatTitle(key)}>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div> {formatTitle(key)}
-                                    </span>
-                                    <div className="w-full">
-                                        {renderValue(value)}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="p-5 border-t border-slate-200 bg-white">
-                            <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs font-semibold">
-                                <svg className="w-5 h-5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                La vista paralela permite confirmar visualmente la precisión de los datos extraídos por la IA.
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <DocumentReviewModal 
+                    docs={[viewingDoc]} 
+                    onClose={() => setViewingDoc(null)} 
+                    onSuccess={() => {
+                        refetchDocs();
+                        // Still reset attempt counter for sequential flow within the row if needed
+                        setHasAttemptedAutoOpen(0);
+                    }} 
+                />
             )}
         </div>
     );

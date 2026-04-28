@@ -1,4 +1,3 @@
-import base64
 from ..state import ClassifiedDocState
 from langchain_google_genai import ChatGoogleGenerativeAI
 from ..llms.config import (
@@ -8,30 +7,38 @@ from ..llms.config import (
 )
 from langchain.messages import HumanMessage
 from pydantic import BaseModel, Field
-from typing import Literal
 from ..file2base64 import _file2base64
+from ..prompt_loader import load_prompt
+from ..types import VinStr
 
 date_format = "%d/%m/%Y"
 
 
 class VehicleInfo(BaseModel):
-    make: str = Field(description="Vehicle make")
-    version: str = Field(description="Vehicle version")
-    model: str = Field(description="Vehicle model (year)")
-    niv: str = Field(description="Vehicle Identification Number or serial number")
-    motor_serial_numer: str = Field(description="Motor serial number")
-    number_cylinders: str = Field(description="Quantity of cilinders")
-    vehicle_id: int = Field("7 digit number usually named as clave vehicular")
+    make: str = Field(description="Vehicle brand")
+    version: str = Field(description="Vehicle version or trim level")
+    model: str = Field(description="Vehicle model year (4-digit number)")
+    niv: VinStr = Field(description="Vehicle Identification Number — exactly 17 alphanumeric characters")
+    motor_serial_numer: str = Field(description="Motor/engine serial number")
+    number_cylinders: str = Field(description="Number of engine cylinders")
+    vehicle_id: int = Field(description="7-digit internal vehicle key (Clave Vehicular)")
 
 
 class Bill(BaseModel):
     issue_date: str = Field(
         description=f"Date of issue of the document in format {date_format}"
     )
-    uuid: str = Field(description="Folio fiscal")
-    client_name: str = Field(description="Client name")
+    uuid: str = Field(description="Fiscal folio UUID (Folio Fiscal)")
+    client_name: str = Field(description="Full name of the buyer/client")
     vehicle_info: VehicleInfo = Field(
-        description="Nested dictionary with vehicle details"
+        description="Nested object with vehicle details"
+    )
+    confidence_score: float = Field(
+        description="Confidence score between 0.0 and 100.0 indicating how clearly and accurately the data was extracted from the document."
+    )
+    extraction_notes: str = Field(
+        description="Any notes, warnings, or anomalies found during extraction (e.g. 'Document is blurry, VIN is hard to read'). Leave empty if everything is clear.",
+        default=""
     )
 
 
@@ -43,19 +50,7 @@ def bill_analysis(state: ClassifiedDocState):
         content=[
             {
                 "type": "text",
-                "text": f"""You are an expert OCR for a vehicle bill in spanish.
-Analize the image and extract:
-- issue date (when the policy begin to apply) in format {date_format}
-- UUID or "folio fiscal"
-- client name
-- vehicle make
-- vehicle version
-- vehicle model (year)
-- NIV or Serial number
-- Motor serial number and kind (gasoline/electric/hybrid)
-- number of cylinders
-- vehicle id usually called as "clave vehicular" (7 digit number).
-""",
+                "text": load_prompt("bill_make", date_format=date_format),
             },
             {
                 "type": type,
@@ -73,41 +68,7 @@ Analize the image and extract:
         .with_structured_output(Bill)
         .invoke([messages])
     )
-    # OLLAMA
-    #
-    #     if file_path.suffix == ".pdf":
-    #         encoded_string = _convert_pdf_to_base64_image(file_path)
-    #         image_data = f"data:image/png;base64,{encoded_string}"
-    #     else:
-    #         with open(file_path, "rb") as image_file:
-    #             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-    #             image_data = f"data:image/jpeg;base64,{encoded_string}"
 
-    #     messages = [
-    #         SystemMessage(
-    #             content="""You are an expert document classifier for an armored vehicle.
-    # Analyze deeply the image and determine its type.
-    # For a Gas Safety Certificate, Gas Inspection Report, Gas Compliance Certificate return 'dictamen_gas'.
-    # For a vehicle registration card return 'tarjeta_circulacion.
-    # For a insurance policy return 'poliza_seguro'
-    # If the document does not correspond to any of the above you HAVE to return 'unknown'
-
-    # IMPORTANT!
-    # You must respond ONLY with a raw JSON object and nothing else. No markdown, no explanations.
-    # The JSON must have this exact structure:
-    # {"document": "dictamen_gas" | "tarjeta_circulacion" | "poliza_seguro" | "certificacion_blindaje" | "unknown"}
-    # """
-    #         ),
-    #         HumanMessage(content=[{"type": "image_url", "image_url": image_data}]),
-    #     ]
-
-    #     response = (
-    #         ChatOllama(model="ministral-3:3b", temperature=0, format="json")
-    #         .with_structured_output(DocumentOCR)
-    #         .invoke(messages)
-    #     )
-
-    # response is now a DocumentOCR instance
     return {
         "final_results": [
             {

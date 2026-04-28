@@ -34,7 +34,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     Dependency that enforces a valid Bearer Token from Authentik.
     """
     if not OIDC_DISCOVERY_URL:
-        return {"sub": "dev-user", "name": "Dev User"}
+        return {"sub": "dev-user", "name": "Dev User", "groups": ["Admin", "flota-docs-editor"]}
         
     client = get_jwks_client()
     if not client:
@@ -59,3 +59,17 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
             detail=f"Invalid authentication token: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+def require_editor(payload: dict = Depends(verify_token)):
+    """
+    Dependency that enforces the user has the 'flota-docs-editor' or 'Admin' role/group.
+    """
+    groups = payload.get("groups", [])
+    
+    if "Admin" in groups or "flota-docs-editor" in groups:
+        return payload
+        
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="No tienes permisos suficientes (rol Editor requerido) para realizar esta acción"
+    )

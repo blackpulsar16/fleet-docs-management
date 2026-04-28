@@ -77,9 +77,18 @@ export const parseExpirationString = (str) => {
   return { docName, timeText, isExpired };
 };
 
-export const renderDocIcon = (docType, isValid) => {
+export const renderDocIcon = (docType, isValid, docStatus) => {
   const typeStr = String(docType).toLowerCase();
-  const colorClass = isValid ? "text-emerald-500" : "text-rose-500 opacity-60";
+  let colorClass;
+  if (!isValid) {
+    colorClass = "text-slate-300";         // faltante
+  } else if (docStatus === 'critical') {
+    colorClass = "text-rose-500";          // vencido
+  } else if (docStatus === 'warning') {
+    colorClass = "text-amber-500";         // por vencer
+  } else {
+    colorClass = "text-emerald-500";       // vigente
+  }
   const props = { size: 18, className: colorClass, strokeWidth: 2.5 };
 
   if (typeStr.includes('bill') || typeStr.includes('factura')) return <FileText {...props} />;

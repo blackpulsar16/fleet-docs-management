@@ -1,4 +1,3 @@
-import base64
 from ..state import ClassifiedDocState
 from langchain_google_genai import ChatGoogleGenerativeAI
 from ..llms.config import (
@@ -10,109 +9,99 @@ from langchain.messages import HumanMessage
 from pydantic import BaseModel, Field
 from typing import Literal
 from ..file2base64 import _file2base64
+from ..prompt_loader import load_prompt
+from ..types import VinStr
 
 date_format = "%d/%m/%Y"
+
+_VIN_RETRY_SUFFIX = (
+    "\n\n⚠️ CORRECTION REQUIRED: The VIN (niv) you returned was rejected because it "
+    "did not have exactly 17 characters. Re-examine the document image carefully. "
+    "The VIN appears in the paragraph near 'número de identificación vehicular'. "
+    "Read every single character individually — do NOT skip any — and count to 17 "
+    "before returning. This is the only field that needs correction."
+)
 
 
 class VehicleInfo(BaseModel):
     make: str = Field(description="Vehicle make")
-    type: str = Field(description="Vehicle type")
-    model: str = Field(description="Vehicle model")
-    niv: str = Field(description="Vehicle Identification Number")
+    type: str = Field(description="Vehicle type/line as labeled in the document")
+    model: str = Field(description="Vehicle model year (4-digit number)")
+    niv: VinStr = Field(description="Vehicle Identification Number — exactly 17 alphanumeric characters")
 
 
 class ArmorCert(BaseModel):
     issue_date: str = Field(
         description=f"Date of issue of the document in format {date_format}"
     )
-    armoring_company: str = Field(description="Armoring company")
-    armor_level: str = Field(description="Armor_level")
-    folio: str = Field(description="Folio")
-    metal_plate_number: str = Field(description="Number of the metal plate")
+    armoring_company: str = Field(description="Full name of the armoring company")
+    armor_level: str = Field(description="Armor protection level")
+    folio: str = Field(description="Document folio or reference number")
+    metal_plate_number: str = Field(description="Metal plate identification number")
     vehicle_info: VehicleInfo = Field(
-        description="Nested dictionary with vehicle details"
+        description="Nested object with vehicle details"
     )
+    confidence_score: float = Field(
+        description="Confidence score between 0.0 and 100.0 indicating how clearly and accurately the data was extracted from the document."
+    )
+    extraction_notes: str = Field(
+        description="Any notes, warnings, or anomalies found during extraction (e.g. 'Document is blurry, VIN is hard to read'). Leave empty if everything is clear.",
+        default=""
+    )
+
+
+def _build_messages(prompt_text: str, file_base64: str, type: str, mime_type: str) -> list:
+    return [
+        HumanMessage(
+            content=[
+                {"type": "text", "text": prompt_text},
+                {"type": type, "base64": file_base64, "mime_type": mime_type},
+            ]
+        )
+    ]
 
 
 def armor_cert_analysis(state: ClassifiedDocState):
     file_path = state["file_path"]
-    # Gemini
     file_base64, type, mime_type = _file2base64(file_path)
 
-    messages = HumanMessage(
-        content=[
-            {
-                "type": "text",
-                "text": f"""You are an expert OCR for an armor certification document.
-Analyze the image and extract:
-- issue date in format {date_format}
-- Armoring company
-- Armor level
-- Folio
-- Metal plate number
-- Vehicle make
-- Vehicle type (usually the model, but in this document it's called different)
-- Vehicle model (year)
-- Vehicle Identification Number
-""",
-            },
-            {
-                "type": type,
-                "base64": file_base64,
-                "mime_type": mime_type,
-            },
-        ]
-    )
-    response = (
+    llm = (
         ChatGoogleGenerativeAI(
             model=ANALYSIS_MODEL,
             thinking_level=ANALYSIS_THINKING_MODEL,
             media_resolution=ANALYSIS_IMAGE_RESOLUTION,
         )
-        .with_structured_output(ArmorCert)
-        .invoke([messages])
+        .with_structured_output(ArmorCert, include_raw=True)
     )
-    # OLLAMA
-    #
-    #     if file_path.suffix == ".pdf":
-    #         encoded_string = _convert_pdf_to_base64_image(file_path)
-    #         image_data = f"data:image/png;base64,{encoded_string}"
-    #     else:
-    #         with open(file_path, "rb") as image_file:
-    #             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-    #             image_data = f"data:image/jpeg;base64,{encoded_string}"
 
-    #     messages = [
-    #         SystemMessage(
-    #             content="""You are an expert document classifier for an armored vehicle.
-    # Analyze deeply the image and determine its type.
-    # For a Gas Safety Certificate, Gas Inspection Report, Gas Compliance Certificate return 'dictamen_gas'.
-    # For a vehicle registration card return 'tarjeta_circulacion.
-    # For a insurance policy return 'poliza_seguro'
-    # If the document does not correspond to any of the above you HAVE to return 'unknown'
+    base_prompt = load_prompt("armor_cert", date_format=date_format)
+    messages = _build_messages(base_prompt, file_base64, type, mime_type)
 
-    # IMPORTANT!
-    # You must respond ONLY with a raw JSON object and nothing else. No markdown, no explanations.
-    # The JSON must have this exact structure:
-    # {"document": "dictamen_gas" | "tarjeta_circulacion" | "poliza_seguro" | "certificacion_blindaje" | "unknown"}
-    # """
-    #         ),
-    #         HumanMessage(content=[{"type": "image_url", "image_url": image_data}]),
-    #     ]
+    resp = llm.invoke(messages)
+    result: ArmorCert | None = resp.get("parsed")
 
-    #     response = (
-    #         ChatOllama(model="ministral-3:3b", temperature=0, format="json")
-    #         .with_structured_output(DocumentOCR)
-    #         .invoke(messages)
-    #     )
+    # If validation failed (most likely an invalid VIN length), retry once
+    # with an explicit correction instruction
+    if result is None:
+        retry_messages = _build_messages(
+            base_prompt + _VIN_RETRY_SUFFIX,
+            file_base64, type, mime_type,
+        )
+        resp = llm.invoke(retry_messages)
+        result = resp.get("parsed")
 
-    # response is now a DocumentOCR instance
+    if result is None:
+        raise ValueError(
+            f"armor_cert_analysis: failed to parse ArmorCert after retry. "
+            f"parsing_error={resp.get('parsing_error')}"
+        )
+
     return {
         "final_results": [
             {
                 "file_path": file_path,
                 "doc_type": state["doc_type"],
-                "data": response.model_dump(),
+                "data": result.model_dump(),
             }
         ]
     }

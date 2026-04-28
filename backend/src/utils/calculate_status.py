@@ -21,8 +21,8 @@ def calculate_status(documents: list):
         missing_docs.discard(document_name)
         
         data = document.get("data") or {}
-        has_expiration = "expiration_date" in data
-        has_issue = "issue_date" in data
+        has_expiration = data.get("expiration_date") is not None
+        has_issue = data.get("issue_date") is not None
         
         if has_expiration or document_name == "dictamen_gas":
             try:

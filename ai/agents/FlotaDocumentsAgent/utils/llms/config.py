@@ -8,5 +8,5 @@ CLASSIFICATION_IMAGE_RESOLUTION = "media_resolution_low"
 
 # Model used for analysis nodes (e.g., insurance_pol_analysis.py, bill_analysis.py, etc.)
 ANALYSIS_MODEL = "gemini-3.1-flash-lite-preview"
-ANALYSIS_THINKING_MODEL = "minimal"
-ANALYSIS_IMAGE_RESOLUTION = "media_resolution_medium"
+ANALYSIS_THINKING_MODEL = "medium"
+ANALYSIS_IMAGE_RESOLUTION = "media_resolution_high"

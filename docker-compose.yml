@@ -7,8 +7,8 @@ services:
     image: mariadb:latest
     container_name: mariadb-flota
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-flota_docs_db}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mariadb_data:/var/lib/mysql
@@ -27,8 +27,8 @@ services:
     image: minio/minio:latest
     container_name: minio-flota
     environment:
-      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-admin_flota}
-      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-supersecretpassword}
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
@@ -53,14 +53,14 @@ services:
     container_name: flota-api
     restart: always
     environment:
-      - DATABASE_URL=mysql+pymysql://${MYSQL_ROOT_USER:-root}:${MYSQL_ROOT_PASSWORD:-root}@mariadb-flota:3306/${MYSQL_DATABASE:-flota_docs_db}?charset=utf8mb4
+      - DATABASE_URL=mysql+pymysql://${MYSQL_ROOT_USER}:${MYSQL_ROOT_PASSWORD}@mariadb-flota:3306/${MYSQL_DATABASE}?charset=utf8mb4
       - S3_ENDPOINT=http://minio-flota:9000
-      - S3_EXTERNAL_ENDPOINT=${S3_EXTERNAL_ENDPOINT:-http://localhost:9000}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-admin_flota}
-      - S3_SECRET_KEY=${S3_SECRET_KEY:-supersecretpassword}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-flota-docs}
+      - S3_EXTERNAL_ENDPOINT=${S3_EXTERNAL_ENDPOINT}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - INGESTION_API_URL=http://ai:8003
-      - OIDC_DISCOVERY_URL=http://server:9000/application/o/flota-docs/
+      - OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -85,14 +85,14 @@ services:
       - LANGCHAIN_API_KEY=${LANGSMITH_API_KEY}
       - LANGCHAIN_PROJECT=${LANGSMITH_PROJECT:-lock_flota}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - DATABASE_URL=mysql+pymysql://${MYSQL_ROOT_USER:-root}:${MYSQL_ROOT_PASSWORD:-root}@mariadb-flota:3306/${MYSQL_DATABASE:-flota_docs_db}?charset=utf8mb4
+      - DATABASE_URL=mysql+pymysql://${MYSQL_ROOT_USER}:${MYSQL_ROOT_PASSWORD}@mariadb-flota:3306/${MYSQL_DATABASE}?charset=utf8mb4
       - S3_ENDPOINT=http://minio-flota:9000
-      - S3_EXTERNAL_ENDPOINT=${S3_EXTERNAL_ENDPOINT:-http://localhost:9000}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-admin_flota}
-      - S3_SECRET_KEY=${S3_SECRET_KEY:-supersecretpassword}
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME:-flota-docs}
+      - S3_EXTERNAL_ENDPOINT=${S3_EXTERNAL_ENDPOINT}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - INGESTION_API_URL=http://flota-api:8001
-      - OIDC_DISCOVERY_URL=http://server:9000/application/o/flota-docs/
+      - OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -109,7 +109,7 @@ services:
     container_name: sol-api
     restart: unless-stopped
     environment:
-      - OIDC_DISCOVERY_URL=http://server:9000/application/o/flota-docs/
+      - OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}
     volumes:
       - ./sol_api_sim/docs:/app/docs
     networks:

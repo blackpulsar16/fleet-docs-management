@@ -716,9 +716,7 @@ export default function FleetDashboard() {
                                         <th className="px-4 py-2.5 w-32 border-b border-gray-200">
                                             <span className="inline-flex items-center">Sistema SOL<SortBtn col="sysStatus" /></span>
                                         </th>
-                                        <th className="px-4 py-2.5 w-28 border-b border-gray-200">
-                                            <span className="inline-flex items-center">Docs<SortBtn col="status" /></span>
-                                        </th>
+
                                         <th className="px-5 py-2.5 min-w-[180px] border-b border-gray-200">Análisis</th>
                                         <th className="px-5 py-2.5 border-b border-gray-200">Vigencias</th>
                                         <th className="pl-5 pr-8 py-2.5 w-20 text-right border-b border-gray-200">Acción</th>
@@ -732,7 +730,7 @@ export default function FleetDashboard() {
                                                 <td className="px-5 py-4"><div className="h-5 bg-gray-200 rounded w-16"></div></td>
                                                 <td className="px-4 py-4"><div className="h-6 bg-gray-100 rounded w-20"></div></td>
                                                 <td className="px-4 py-4"><div className="h-6 bg-indigo-50 rounded w-24"></div></td>
-                                                <td className="px-4 py-4"><div className="h-6 bg-gray-200 rounded w-14"></div></td>
+
                                                 <td className="px-5 py-4"><div className="flex gap-2"><div className="w-6 h-6 bg-gray-200 rounded-full"></div><div className="w-6 h-6 bg-gray-200 rounded-full"></div></div></td>
                                                 <td className="px-5 py-4">
                                                     <div className="flex gap-2">
@@ -782,11 +780,7 @@ export default function FleetDashboard() {
                                                             <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100 text-xs font-medium">{vehicle.sysStatus}</span>
                                                         </td>
 
-                                                        <td className="px-4 py-2.5 align-middle">
-                                                            {vehicle.status === 'critical' && <span className="text-[10px] font-medium text-red-600 uppercase tracking-wide">Crítico</span>}
-                                                            {vehicle.status === 'warning'  && <span className="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Alerta</span>}
-                                                            {vehicle.status === 'ok'       && <span className="text-[10px] font-medium text-green-600 uppercase tracking-wide">OK</span>}
-                                                        </td>
+
 
                                                         <td className="px-5 py-2.5 align-top">
                                                             <div className="flex flex-nowrap gap-2 items-center pt-0.5">
@@ -865,7 +859,7 @@ export default function FleetDashboard() {
                                                     {/* EXPANDED CONTENT ROW */}
                                                     {isExpanded && (
                                                         <tr>
-                                                            <td colSpan={8} className="p-0 border-b border-gray-200 bg-gray-50/30">
+                                                            <td colSpan={6} className="p-0 border-b border-gray-200 bg-gray-50/30">
                                                                 <div className="animate-in slide-in-from-top-2 fade-in duration-150 ease-out border-l-2 border-l-blue-500 overflow-hidden">
                                                                     <div className="px-4 pb-5 pt-2 md:px-6 md:pb-6 md:pt-2">
                                                                         <ExpandedVehicleRow
@@ -886,7 +880,7 @@ export default function FleetDashboard() {
 
                                         {filteredVehicles.length === 0 && !isLoadingFleet && (
                                             <tr>
-                                                <td colSpan={8} className="px-5 py-16 text-center text-gray-400 text-base bg-white border-t border-gray-100">
+                                                <td colSpan={6} className="px-5 py-16 text-center text-gray-400 text-base bg-white border-t border-gray-100">
                                                     <div className="flex flex-col items-center">
                                                         <span className="text-4xl mb-3 opacity-50">📋</span>
                                                         <span className="font-semibold text-gray-600 ">No hay vehículos que coincidan</span>

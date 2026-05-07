@@ -593,7 +593,8 @@ export default function FleetDashboard() {
             {/* ── MAIN CONTENT ── */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-                {/* ── KPI STRIP ── */}
+                {/* ── KPI STRIP — hidden in discrepancy view ── */}
+                {!isDiscrepancyView && (
                 <header className="flex-shrink-0 flex items-center gap-1 px-5 py-3 bg-white border-b border-slate-100 z-10 relative">
                     {docTypeFilter !== 'all' ? (
                         [
@@ -635,6 +636,7 @@ export default function FleetDashboard() {
                         </div>
                     )}
                 </header>
+                )}
 
                 {/* MAIN LIST VIEW (DATA TABLE) or DOC FILTER VIEW or DISCREPANCY VIEW */}
                 <main className="flex-1 flex flex-col overflow-hidden relative">

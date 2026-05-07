@@ -221,10 +221,10 @@ function DownloadGroupButton({ docType, state, count, fetchWithAuth }) {
 
 /* ── Column config ────────────────────────────────────────────── */
 const COLS = [
-    { key: 'ok',       label: 'Vigentes',   headerBg: 'bg-gray-50', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-emerald-400', idColor: 'text-gray-800' },
-    { key: 'expiring', label: 'Por Vencer', headerBg: 'bg-gray-50', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-amber-400',   idColor: 'text-gray-800' },
-    { key: 'expired',  label: 'Vencidos',   headerBg: 'bg-gray-50', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-red-400',     idColor: 'text-gray-800' },
-    { key: 'missing',  label: 'Sin Doc.',   headerBg: 'bg-gray-50', colBg: 'bg-gray-50', border: 'border-gray-200', cardBorder: 'border-gray-100',                        accent: 'bg-gray-300',    idColor: 'text-gray-500' },
+    { key: 'ok',       label: 'Vigentes',   headerBg: 'bg-gray-100', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-emerald-400', idColor: 'text-gray-800' },
+    { key: 'expiring', label: 'Por Vencer', headerBg: 'bg-gray-100', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-amber-400',   idColor: 'text-gray-800' },
+    { key: 'expired',  label: 'Vencidos',   headerBg: 'bg-gray-100', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-red-400',     idColor: 'text-gray-800' },
+    { key: 'missing',  label: 'Sin Doc.',   headerBg: 'bg-gray-100', colBg: 'bg-gray-50', border: 'border-gray-200', cardBorder: 'border-gray-100',                        accent: 'bg-gray-300',    idColor: 'text-gray-500' },
 ];
 
 /* ── Main component ───────────────────────────────────────────── */

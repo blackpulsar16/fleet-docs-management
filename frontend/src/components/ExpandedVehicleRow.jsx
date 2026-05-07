@@ -163,7 +163,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                         setViewerRotation(0);
                                                         setViewingDoc(doc);
                                                     }}
-                                                    className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-100 hover:border-blue-300 px-2.5 py-1 rounded-md hover:bg-blue-100 transition-colors shadow-sm active:scale-95"
+                                                    className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-100 hover:border-blue-300 px-2 py-0.5 rounded-md hover:bg-blue-100 transition-colors shadow-sm active:scale-95"
                                                     title="Visualizar documento en pantalla dividida"
                                                 >
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                             setViewerRotation(0);
                                                             setViewingDoc(doc);
                                                         }}
-                                                        className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 hover:border-amber-300 px-2.5 py-1 rounded-md hover:bg-amber-100 transition-colors shadow-sm active:scale-95"
+                                                        className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-100 hover:border-amber-300 px-2 py-0.5 rounded-md hover:bg-amber-100 transition-colors shadow-sm active:scale-95"
                                                         title="Editar datos manualmente sin IA"
                                                     >
                                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,7 +205,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                             console.error('Error descargando archivo:', err);
                                                         }
                                                     }}
-                                                    className="inline-flex items-center gap-1.5 text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 hover:border-gray-300 px-2.5 py-1 rounded-md hover:bg-gray-100 transition-colors shadow-sm active:scale-95"
+                                                    className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-bold text-gray-500 bg-gray-50 border border-gray-200 hover:border-gray-300 px-2 py-0.5 rounded-md hover:bg-gray-100 transition-colors shadow-sm active:scale-95"
                                                     title="Descargar archivo"
                                                 >
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

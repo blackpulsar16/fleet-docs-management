@@ -463,12 +463,12 @@ export default function FleetDashboard() {
         <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans antialiased">
 
             {/* ── SIDEBAR ── */}
-            <aside className="w-56 flex-shrink-0 flex flex-col bg-slate-900 text-white border-r border-slate-800">
+            <aside className="w-56 flex-shrink-0 flex flex-col bg-white text-gray-700 border-r border-gray-200">
 
                 {/* Logo */}
                 <div className="px-5 pt-5 pb-4">
-                    <h1 className="text-sm font-black tracking-tight text-white">Gestión Flota</h1>
-                    <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mt-0.5">Panel de control</p>
+                    <h1 className="text-sm font-semibold tracking-tight text-gray-800">Gestión Flota</h1>
+                    <p className="text-[9px] text-gray-400 font-medium uppercase tracking-widest mt-0.5">Panel de control</p>
                 </div>
 
                 {/* Scrollable filter area */}
@@ -480,7 +480,7 @@ export default function FleetDashboard() {
                         <input
                             type="text"
                             placeholder="Buscar ID o modelo..."
-                            className="w-full pl-7 pr-6 py-2 bg-slate-800 border border-slate-700/60 rounded-md text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            className="w-full pl-7 pr-6 py-2 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -491,9 +491,9 @@ export default function FleetDashboard() {
 
                     {/* Section: Vehículo */}
                     <div className="flex flex-col gap-2">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 px-0.5">Vehículo</p>
+                        <p className="text-[9px] font-medium uppercase tracking-widest text-gray-400 px-0.5">Vehículo</p>
                         <select
-                            className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700/60 rounded-md text-xs text-slate-400 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                            className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
                             value={unFilter}
                             onChange={(e) => setUnFilter(e.target.value)}
                         >
@@ -501,7 +501,7 @@ export default function FleetDashboard() {
                             {uniqueUNs.map(un => <option key={un} value={un}>{un}</option>)}
                         </select>
                         <select
-                            className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700/60 rounded-md text-xs text-slate-400 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+                            className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
                             value={sysStatusFilter}
                             onChange={(e) => setSysStatusFilter(e.target.value)}
                         >
@@ -512,13 +512,13 @@ export default function FleetDashboard() {
 
                     {/* Section: Documento */}
                     <div className="flex flex-col gap-2">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 px-0.5">Documento</p>
+                        <p className="text-[9px] font-medium uppercase tracking-widest text-gray-400 px-0.5">Documento</p>
                         <select
                             id="filter-doc-type"
                             className={`w-full px-2.5 py-1.5 border rounded-md text-xs cursor-pointer focus:outline-none focus:ring-1 transition-colors ${
                                 docTypeFilter !== 'all'
-                                    ? 'bg-slate-700 border-slate-600 text-slate-200 focus:ring-slate-500'
-                                    : 'bg-slate-800 border-slate-700/60 text-slate-400 focus:ring-slate-500'
+                                    ? 'bg-blue-50 border-blue-200 text-blue-700 focus:ring-blue-400'
+                                    : 'bg-gray-50 border-gray-200 text-gray-600 focus:ring-blue-400'
                             }`}
                             value={docTypeFilter}
                             onChange={(e) => { setDocTypeFilter(e.target.value); setDocStateFilter('all'); }}
@@ -530,10 +530,10 @@ export default function FleetDashboard() {
                             disabled={docTypeFilter === 'all'}
                             className={`w-full px-2.5 py-1.5 border rounded-md text-xs cursor-pointer focus:outline-none focus:ring-1 transition-colors ${
                                 docTypeFilter === 'all'
-                                    ? 'bg-slate-800/30 border-slate-800 text-slate-700 cursor-not-allowed'
+                                    ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
                                     : docStateFilter !== 'all'
-                                        ? 'bg-slate-700 border-slate-600 text-slate-200 focus:ring-slate-500'
-                                        : 'bg-slate-800 border-slate-700/60 text-slate-400 focus:ring-slate-500'
+                                        ? 'bg-blue-50 border-blue-200 text-blue-700 focus:ring-blue-400'
+                                        : 'bg-gray-50 border-gray-200 text-gray-600 focus:ring-blue-400'
                             }`}
                             value={docStateFilter}
                             onChange={(e) => setDocStateFilter(e.target.value)}
@@ -544,7 +544,7 @@ export default function FleetDashboard() {
                             <button
                                 id="clear-doc-filter"
                                 onClick={() => { setDocTypeFilter('all'); setDocStateFilter('all'); }}
-                                className="flex items-center justify-center gap-1 w-full py-1.5 rounded-md border border-slate-700 text-slate-400 text-[10px] font-bold hover:bg-slate-800 transition-colors"
+                                className="flex items-center justify-center gap-1 w-full py-1.5 rounded-md border border-gray-200 text-gray-500 text-[10px] font-medium hover:bg-gray-50 transition-colors"
                             >
                                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                                 Limpiar filtro
@@ -555,13 +555,13 @@ export default function FleetDashboard() {
                 </div>
 
                 {/* Bottom: Upload + Logout */}
-                <div className="px-3 py-3 border-t border-slate-800 flex flex-col gap-1.5">
+                <div className="px-3 py-3 border-t border-gray-100 flex flex-col gap-1.5">
                     <button
                         onClick={() => { setIsDiscrepancyView(true); setDocTypeFilter('all'); setDocStateFilter('all'); }}
-                        className={`w-full flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all ${
+                        className={`w-full flex items-center justify-center gap-2 py-2 rounded-md text-xs font-medium transition-all ${
                             isDiscrepancyView
-                                ? 'bg-rose-700/30 text-rose-300 border border-rose-700/40'
-                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-slate-700/40'
+                                ? 'bg-red-50 text-red-600 border border-red-200'
+                                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 border border-gray-200'
                         }`}
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -572,7 +572,7 @@ export default function FleetDashboard() {
                     {isEditor && (
                         <button
                             onClick={() => setIsUploadModalOpen(true)}
-                            className="w-full flex items-center justify-center gap-2 py-2 bg-slate-700 text-slate-200 rounded-md text-xs font-bold hover:bg-slate-600 active:scale-95 transition-all"
+                            className="w-full flex items-center justify-center gap-2 py-2 bg-gray-100 text-gray-700 rounded-md text-xs font-medium hover:bg-gray-200 active:scale-95 transition-all border border-gray-200"
                         >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                             Subir documento
@@ -581,7 +581,7 @@ export default function FleetDashboard() {
                     {auth.isAuthenticated && (
                         <button
                             onClick={() => void auth.signoutRedirect()}
-                            className="w-full flex items-center justify-center gap-2 py-1.5 text-slate-600 text-[10px] font-bold uppercase tracking-widest hover:text-rose-400 transition-colors"
+                            className="w-full flex items-center justify-center gap-2 py-1.5 text-gray-400 text-[10px] font-medium uppercase tracking-widest hover:text-red-500 transition-colors"
                         >
                             <LogOut className="w-3 h-3" />
                             Cerrar sesión
@@ -671,23 +671,23 @@ export default function FleetDashboard() {
                             onScroll={handleScroll}
                         >
                             <table className="w-full text-sm text-left relative border-collapse">
-                                <thead className="sticky top-0 z-20 bg-slate-800 text-white uppercase text-xs font-bold tracking-wider shadow-md">
+                                <thead className="sticky top-0 z-20 bg-gray-50 text-gray-400 uppercase text-[11px] font-semibold tracking-wider border-b border-gray-200">
                                     <tr>
-                                        <th className="px-5 py-2.5 w-28 rounded-tl-lg border-b border-slate-800">
+                                        <th className="px-5 py-2.5 w-28 border-b border-gray-200">
                                             <span className="inline-flex items-center">ID Vh.<SortBtn col="id" /></span>
                                         </th>
-                                        <th className="px-4 py-2.5 w-36 border-b border-slate-800">
+                                        <th className="px-4 py-2.5 w-36 border-b border-gray-200">
                                             <span className="inline-flex items-center">UN (Plaza)<SortBtn col="un" /></span>
                                         </th>
-                                        <th className="px-4 py-2.5 w-32 border-b border-slate-800">
+                                        <th className="px-4 py-2.5 w-32 border-b border-gray-200">
                                             <span className="inline-flex items-center">Sistema SOL<SortBtn col="sysStatus" /></span>
                                         </th>
-                                        <th className="px-4 py-2.5 w-28 border-b border-slate-800">
+                                        <th className="px-4 py-2.5 w-28 border-b border-gray-200">
                                             <span className="inline-flex items-center">Docs<SortBtn col="status" /></span>
                                         </th>
-                                        <th className="px-5 py-2.5 min-w-[180px] border-b border-slate-800">Análisis</th>
-                                        <th className="px-5 py-2.5 border-b border-slate-800">Vigencias</th>
-                                        <th className="pl-5 pr-8 py-2.5 w-20 text-right rounded-tr-lg border-b border-slate-800">Acción</th>
+                                        <th className="px-5 py-2.5 min-w-[180px] border-b border-gray-200">Análisis</th>
+                                        <th className="px-5 py-2.5 border-b border-gray-200">Vigencias</th>
+                                        <th className="pl-5 pr-8 py-2.5 w-20 text-right border-b border-gray-200">Acción</th>
                                     </tr>
                                 </thead>
 
@@ -733,29 +733,25 @@ export default function FleetDashboard() {
                                                     <tr
                                                         id={`row-${vehicle.id}`}
                                                         className={`group transition-all duration-200 cursor-pointer scroll-mt-12
- ${isExpanded ? 'bg-blue-50/60 shadow-[inset_4px_0_0_0_rgba(59,130,246,1)] border-b-blue-100 ' : 'hover:bg-slate-50 border-transparent hover:border-slate-200 '}`}
+ ${isExpanded ? 'bg-blue-50/40 shadow-[inset_2px_0_0_0_rgba(59,130,246,1)] border-b-blue-100 ' : 'hover:bg-gray-50 border-transparent '}`}
                                                         onClick={() => handleRowClick(vehicle.id)}
                                                     >
                                                         <td className="px-5 py-2.5 align-middle">
-                                                            <span className="font-extrabold text-slate-800 text-[15px]">{vehicle.id}</span>
+                                                            <span className="font-semibold text-gray-800 text-[14px]">{vehicle.id}</span>
                                                         </td>
 
                                                         <td className="px-4 py-2.5 align-middle">
-                                                            <span className="inline-flex items-center px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200/60 text-xs font-bold uppercase tracking-wide">
-                                                                {vehicle.un}
-                                                            </span>
+                                                            <span className="text-gray-600 text-xs font-medium">{vehicle.un}</span>
                                                         </td>
 
                                                         <td className="px-4 py-2.5 align-middle">
-                                                            <span className="inline-flex items-center px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 text-xs font-bold uppercase tracking-wide">
-                                                                {vehicle.sysStatus}
-                                                            </span>
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100 text-xs font-medium">{vehicle.sysStatus}</span>
                                                         </td>
 
                                                         <td className="px-4 py-2.5 align-middle">
-                                                            {vehicle.status === 'critical' && <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold text-rose-700 border border-rose-200 uppercase tracking-widest">Crítico</span>}
-                                                            {vehicle.status === 'warning'  && <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold text-amber-700 border border-amber-200 uppercase tracking-widest">Alerta</span>}
-                                                            {vehicle.status === 'ok'       && <span className="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold text-slate-500 border border-slate-200 uppercase tracking-widest">OK</span>}
+                                                            {vehicle.status === 'critical' && <span className="text-[10px] font-medium text-red-600 uppercase tracking-wide">Crítico</span>}
+                                                            {vehicle.status === 'warning'  && <span className="text-[10px] font-medium text-amber-600 uppercase tracking-wide">Alerta</span>}
+                                                            {vehicle.status === 'ok'       && <span className="text-[10px] font-medium text-green-600 uppercase tracking-wide">OK</span>}
                                                         </td>
 
                                                         <td className="px-5 py-2.5 align-top">
@@ -835,8 +831,8 @@ export default function FleetDashboard() {
                                                     {/* EXPANDED CONTENT ROW */}
                                                     {isExpanded && (
                                                         <tr>
-                                                            <td colSpan={8} className="p-0 border-b border-slate-200 bg-slate-50/50 ">
-                                                                <div className="animate-in slide-in-from-top-2 fade-in duration-150 ease-out border-l-4 border-l-blue-600 overflow-hidden shadow-inner">
+                                                            <td colSpan={8} className="p-0 border-b border-gray-200 bg-gray-50/30">
+                                                                <div className="animate-in slide-in-from-top-2 fade-in duration-150 ease-out border-l-2 border-l-blue-500 overflow-hidden">
                                                                     <div className="px-4 pb-5 pt-2 md:px-6 md:pb-6 md:pt-2">
                                                                         <ExpandedVehicleRow
                                                                             vehicle={vehicle}

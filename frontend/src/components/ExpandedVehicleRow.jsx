@@ -615,17 +615,17 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
 
     return (
         <div className="w-full relative">
-            <div className="flex justify-between items-end border-b-2 border-slate-200/50 mb-4">
+            <div className="flex justify-between items-end border-b border-gray-200 mb-4">
                 <div className="flex gap-8">
                     <button
-                        className={`pb-3 text-xs font-black tracking-widest relative transition-colors ${activeTab === 'docs' ? 'text-blue-600 ' : 'text-slate-400 hover:text-slate-600 '}`}
+                        className={`pb-3 text-xs font-medium tracking-wide relative transition-colors ${activeTab === 'docs' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                         onClick={() => onTabChange('docs')}
                     >
                         DOCUMENTOS (OCR)
                         {activeTab === 'docs' && <div className="absolute -bottom-[2px] left-0 right-0 h-[3px] bg-blue-600 rounded-t-full shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>}
                     </button>
                     <button
-                        className={`pb-3 text-xs font-black tracking-widest relative transition-colors ${activeTab === 'spec' ? 'text-blue-600 ' : 'text-slate-400 hover:text-slate-600 '}`}
+                        className={`pb-3 text-xs font-medium tracking-wide relative transition-colors ${activeTab === 'spec' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                         onClick={() => onTabChange('spec')}
                     >
                         FICHA TÉCNICA (SOL)
@@ -633,7 +633,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                     </button>
                     <button
                         className={`pb-3 text-xs font-black tracking-widest relative transition-colors flex items-center gap-1.5 ${
-                            activeTab === 'validation' ? 'text-violet-600' : 'text-slate-400 hover:text-slate-600'
+                            activeTab === 'validation' ? 'text-violet-600' : 'text-gray-400 hover:text-gray-600'
                         }`}
                         onClick={() => onTabChange('validation')}
                     >
@@ -646,7 +646,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                 </div>
 
                 <button
-                    className="mb-2 text-[10px] font-black tracking-widest text-slate-400 hover:text-rose-600 bg-white border border-slate-200/80 px-3 py-1.5 rounded-md shadow-sm hover:shadow hover:border-rose-200 transition-all active:scale-95 flex items-center gap-1.5"
+                    className="mb-2 text-[10px] font-medium tracking-wide text-gray-400 hover:text-red-500 bg-white border border-gray-200 px-3 py-1.5 rounded-md hover:border-red-200 transition-all active:scale-95 flex items-center gap-1.5"
                     onClick={onClose}
                 >
                     CERRAR PANEL

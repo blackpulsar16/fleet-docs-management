@@ -289,14 +289,14 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
         <div className="flex flex-col h-full overflow-hidden">
 
             {/* ── Banner ── */}
-            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                    <span className="text-[10px] font-medium uppercase tracking-widest text-gray-400">
                         Vista Discrepancias
                     </span>
-                    <div className="w-px h-4 bg-slate-700" />
-                    <span className="text-sm font-black text-white">
+                    <div className="w-px h-4 bg-gray-200" />
+                    <span className="text-sm font-semibold text-gray-800">
                         Validación cruzada OCR
                     </span>
                     {!isLoading && data && (
@@ -317,13 +317,13 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                             placeholder="Buscar ID..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="pl-6 pr-3 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-500 w-32"
+                            className="pl-6 pr-3 py-1 bg-gray-50 border border-gray-200 rounded text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 w-32"
                         />
                     </div>
                     <button
                         onClick={() => refetch()}
                         title="Actualizar"
-                        className="flex items-center justify-center w-7 h-7 rounded border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                        className="flex items-center justify-center w-7 h-7 rounded border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -331,7 +331,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                     </button>
                     <button
                         onClick={onClose}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 text-[10px] font-bold hover:bg-slate-800 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-[10px] font-medium hover:bg-gray-50 transition-colors"
                     >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -370,14 +370,14 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
             ) : (
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {/* Table header */}
-                    <div className="flex-shrink-0 grid bg-slate-800 border-b border-slate-700 text-[10px] font-black uppercase tracking-widest text-slate-400"
+                    <div className="flex-shrink-0 grid bg-gray-50 border-b border-gray-200 text-[10px] font-semibold uppercase tracking-widest text-gray-400"
                         style={{ gridTemplateColumns: '10rem 1fr 10rem 6rem' }}>
                         <button
                             onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
-                            className="px-5 py-2.5 flex items-center gap-1.5 text-left hover:text-white transition-colors group"
+                            className="px-5 py-2.5 flex items-center gap-1.5 text-left hover:text-gray-600 transition-colors group"
                         >
                             ID Vehículo
-                            <svg className={`w-3 h-3 transition-transform duration-150 text-slate-500 group-hover:text-slate-300 ${sortDir === 'desc' ? 'rotate-180' : ''}`}
+                            <svg className={`w-3 h-3 transition-transform duration-150 text-gray-400 group-hover:text-gray-600 ${sortDir === 'desc' ? 'rotate-180' : ''}`}
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
                             </svg>

@@ -114,20 +114,20 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
     return (
         <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex flex-col md:flex-row p-4 md:p-6 gap-6 animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-4 duration-300 ease-out">
             <div className="flex-1 bg-slate-950 rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden relative flex flex-col">
-                <div className="px-5 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-900 shrink-0 z-20 shadow-sm">
+                <div className="px-5 py-3 border-b border-gray-200 flex justify-between items-center bg-white shrink-0 z-20 shadow-sm">
                     <div className="flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
                         <div className="flex flex-col">
-                            <h4 className="text-slate-200 font-bold tracking-wide text-sm truncate max-w-[200px] md:max-w-xs">{formatTitle(doc.doc_type)}</h4>
-                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Vehículo: {doc.vehicle_id}</span>
+                            <h4 className="text-gray-800 font-semibold tracking-wide text-sm truncate max-w-[200px] md:max-w-xs">{formatTitle(doc.doc_type)}</h4>
+                            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Vehículo: {doc.vehicle_id}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">
                             <span>ABRIR EXTERNO</span>
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </a>
-                        <button onClick={onClose} className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-rose-500 hover:text-white transition-colors">
+                        <button onClick={onClose} className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>

@@ -183,10 +183,10 @@ function DownloadGroupButton({ docType, state, count, fetchWithAuth }) {
     if (count === 0) return null;
 
     const colors = {
-        ok:       'bg-slate-700 hover:bg-slate-600',
-        expiring: 'bg-slate-700 hover:bg-slate-600',
-        expired:  'bg-slate-700 hover:bg-slate-600',
-        missing:  'bg-slate-600 hover:bg-slate-500',
+        ok:       'bg-gray-100 hover:bg-gray-200 text-gray-700',
+        expiring: 'bg-gray-100 hover:bg-gray-200 text-gray-700',
+        expired:  'bg-gray-100 hover:bg-gray-200 text-gray-700',
+        missing:  'bg-gray-100 hover:bg-gray-200 text-gray-600',
     };
 
     const handleDownload = async () => {
@@ -207,7 +207,7 @@ function DownloadGroupButton({ docType, state, count, fetchWithAuth }) {
 
     return (
         <button onClick={handleDownload} disabled={dlState === 'loading'}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider text-white transition-all shadow-sm active:scale-95 ${colors[state]} ${dlState === 'loading' ? 'opacity-60 cursor-wait' : ''}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all shadow-sm active:scale-95 ${colors[state]} ${dlState === 'loading' ? 'opacity-60 cursor-wait' : ''}`}>
             {dlState === 'loading'
                 ? <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
                 : dlState === 'done'
@@ -221,10 +221,10 @@ function DownloadGroupButton({ docType, state, count, fetchWithAuth }) {
 
 /* ── Column config ────────────────────────────────────────────── */
 const COLS = [
-    { key: 'ok',       label: 'Vigentes',   headerBg: 'bg-slate-800', colBg: 'bg-white',      border: 'border-slate-200', cardBorder: 'border-slate-100 hover:border-slate-300', accent: 'bg-emerald-500/60', idColor: 'text-slate-800' },
-    { key: 'expiring', label: 'Por Vencer', headerBg: 'bg-slate-800', colBg: 'bg-white',      border: 'border-slate-200', cardBorder: 'border-slate-100 hover:border-slate-300', accent: 'bg-amber-400/70',   idColor: 'text-slate-800' },
-    { key: 'expired',  label: 'Vencidos',   headerBg: 'bg-slate-800', colBg: 'bg-white',      border: 'border-slate-200', cardBorder: 'border-slate-100 hover:border-slate-300', accent: 'bg-rose-400/60',    idColor: 'text-slate-800' },
-    { key: 'missing',  label: 'Sin Doc.',   headerBg: 'bg-slate-700', colBg: 'bg-slate-50/80',border: 'border-slate-200', cardBorder: 'border-slate-100',                        accent: 'bg-slate-300',      idColor: 'text-slate-600' },
+    { key: 'ok',       label: 'Vigentes',   headerBg: 'bg-gray-50', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-emerald-400', idColor: 'text-gray-800' },
+    { key: 'expiring', label: 'Por Vencer', headerBg: 'bg-gray-50', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-amber-400',   idColor: 'text-gray-800' },
+    { key: 'expired',  label: 'Vencidos',   headerBg: 'bg-gray-50', colBg: 'bg-white',   border: 'border-gray-200', cardBorder: 'border-gray-100 hover:border-gray-300', accent: 'bg-red-400',     idColor: 'text-gray-800' },
+    { key: 'missing',  label: 'Sin Doc.',   headerBg: 'bg-gray-50', colBg: 'bg-gray-50', border: 'border-gray-200', cardBorder: 'border-gray-100',                        accent: 'bg-gray-300',    idColor: 'text-gray-500' },
 ];
 
 /* ── Main component ───────────────────────────────────────────── */
@@ -262,25 +262,25 @@ export default function DocFilterView({ docType, docStateFilter, onClearFilter }
     return (
         <div className="flex flex-col h-full overflow-hidden">
             {/* Banner */}
-            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vista Documento</span>
-                    <div className="w-px h-4 bg-indigo-800" />
-                    <span className="text-sm font-black text-white">{docLabel}</span>
-                    {!isLoading && <span className="text-xs text-slate-400">· {total} vehículos</span>}
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                    <span className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Vista Documento</span>
+                    <div className="w-px h-4 bg-gray-200" />
+                    <span className="text-sm font-semibold text-gray-800">{docLabel}</span>
+                    {!isLoading && <span className="text-xs text-gray-400">· {total} vehículos</span>}
                 </div>
                 <div className="flex items-center gap-2">
                     {!isLoading && data && (
                         <div className="flex items-center gap-2">
-                            {s.ok       > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-600 text-slate-300">{s.ok} vigentes</span>}
-                            {s.expiring > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-600 text-slate-300">{s.expiring} por vencer</span>}
-                            {s.expired  > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-600 text-slate-300">{s.expired} vencidos</span>}
-                            {s.missing  > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-600 text-slate-300">{s.missing} faltantes</span>}
+                            {s.ok       > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-gray-200 text-gray-500">{s.ok} vigentes</span>}
+                            {s.expiring > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-amber-200 text-amber-600">{s.expiring} por vencer</span>}
+                            {s.expired  > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-red-200 text-red-600">{s.expired} vencidos</span>}
+                            {s.missing  > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-gray-200 text-gray-400">{s.missing} faltantes</span>}
                         </div>
                     )}
                     <button onClick={onClearFilter}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 text-[10px] font-bold hover:bg-slate-800 transition-colors">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-[10px] font-medium hover:bg-gray-50 transition-colors">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         Salir vista doc.
                     </button>
@@ -314,15 +314,15 @@ export default function DocFilterView({ docType, docStateFilter, onClearFilter }
                                 className={`flex flex-col flex-1 min-w-0 rounded-xl border ${col.border} ${col.colBg} overflow-hidden`}
                             >
                                 {/* Col header */}
-                                <div className={`${col.headerBg} px-4 py-3 flex items-center justify-between shrink-0`}>
+                                <div className={`${col.headerBg} border-b border-gray-200 px-4 py-2.5 flex items-center justify-between shrink-0`}>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-black text-white">{col.label}</span>
-                                        <span className="text-xs font-black px-2 py-0.5 rounded-full bg-white/20 text-white">{vehicles.length}</span>
+                                        <span className="text-xs font-semibold text-gray-600">{col.label}</span>
+                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{vehicles.length}</span>
                                         {col.key !== 'missing' && (
                                             <button
                                                 onClick={() => toggleSort(col.key)}
                                                 title={sortDirs[col.key] === 'asc' ? 'Ordenado: más próximo primero' : 'Ordenado: más lejano primero'}
-                                                className="flex items-center ml-1 p-1 rounded bg-white/15 hover:bg-white/30 text-white transition-colors"
+                                                className="flex items-center ml-1 p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
                                             >
                                                 <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${sortDirs[col.key] === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />

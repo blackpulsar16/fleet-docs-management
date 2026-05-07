@@ -499,10 +499,10 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
         ];
 
         const statusConfig = {
-            ok:       { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', label: 'COINCIDE',     icon: '✓' },
-            mismatch: { bg: 'bg-rose-50',    border: 'border-rose-300',    badge: 'bg-rose-100 text-rose-700 border-rose-200',         label: 'DISCREPANCIA', icon: '✕' },
-            partial:  { bg: 'bg-amber-50',   border: 'border-amber-200',   badge: 'bg-amber-100 text-amber-700 border-amber-200',       label: 'PARCIAL',      icon: '⚠' },
-            missing:  { bg: 'bg-gray-50',   border: 'border-gray-200',   badge: 'bg-gray-100 text-gray-500 border-gray-200',       label: 'SIN DATOS',    icon: '—' },
+            ok:       { bg: 'bg-white', border: 'border-gray-200 border-l-[3px] border-l-emerald-400', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'COINCIDE',     icon: '✓' },
+            mismatch: { bg: 'bg-white', border: 'border-gray-200 border-l-[3px] border-l-rose-400',    badge: 'bg-rose-50 text-rose-700 border-rose-200',         label: 'DISCREPANCIA', icon: '✕' },
+            partial:  { bg: 'bg-white', border: 'border-gray-200 border-l-[3px] border-l-amber-400',   badge: 'bg-amber-50 text-amber-700 border-amber-200',       label: 'PARCIAL',      icon: '⚠' },
+            missing:  { bg: 'bg-gray-50/50', border: 'border-gray-200', badge: 'bg-gray-100 text-gray-500 border-gray-200',       label: 'SIN DATOS',    icon: '—' },
         };
 
         const getCardStatus = (gtVal, comparisons) => {
@@ -527,13 +527,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
             <div className="pt-4 animate-in fade-in duration-500 flex flex-col gap-5">
 
                 {/* Summary Banner */}
-                <div className={`flex items-center gap-4 px-5 py-3.5 rounded-md border ${
-                    mismatches > 0
-                        ? 'bg-rose-50 border-rose-200'
-                        : allOk
-                            ? 'bg-emerald-50 border-emerald-200'
-                            : 'bg-amber-50 border-amber-200'
-                }`}>
+                <div className={`flex items-center gap-4 px-5 py-3.5 rounded-md border bg-gray-50 border-gray-200`}>
                     <span className="text-2xl">
                         {mismatches > 0 ? '🚨' : allOk ? '✅' : '⚠️'}
                     </span>
@@ -572,7 +566,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 </div>
 
                                 {/* Ground truth value */}
-                                <div className="mb-3 p-3 rounded-md bg-white/80 border border-white shadow-sm">
+                                <div className="mb-3 p-3 rounded-md bg-gray-50 border border-gray-100 shadow-sm">
                                     <div className="text-[9px] font-medium text-gray-400 uppercase tracking-widest mb-1">
                                         Valor usado · {gtLabel}
                                     </div>
@@ -586,16 +580,10 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                     {comparisons.map(({ label: srcLabel, value }) => {
                                         const isMismatch = value != null && gtVal != null && norm(value) !== norm(gtVal);
                                         return (
-                                            <div key={srcLabel} className={`flex flex-col p-2 rounded-md border ${
-                                                isMismatch
-                                                    ? 'bg-rose-50/80 border-rose-200'
-                                                    : value != null
-                                                        ? 'bg-white/60 border-gray-200/60'
-                                                        : 'bg-gray-50/40 border-gray-100'
-                                            }`}>
+                                            <div key={srcLabel} className={`flex flex-col p-2 rounded-md border bg-gray-50 border-gray-100`}>
                                                 <span className="text-[8px] font-medium text-gray-400 uppercase tracking-widest mb-1 leading-tight">{srcLabel}</span>
                                                 <span className={`text-[11px] font-medium break-all leading-snug ${
-                                                    isMismatch ? 'text-rose-700' : value != null ? 'text-gray-700' : 'text-gray-300 italic font-normal'
+                                                    isMismatch ? 'text-rose-600' : value != null ? 'text-gray-700' : 'text-gray-400 italic font-normal'
                                                 }`}>
                                                     {value ?? 'Sin dato'}
                                                     {isMismatch && <span className="ml-1 text-rose-500">✕</span>}
@@ -607,7 +595,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 </div>
 
                                 {cardStatus === 'mismatch' && (
-                                    <div className="mt-3 flex items-center gap-2 text-[11px] font-medium text-rose-700 bg-rose-100/60 px-3 py-1.5 rounded-md border border-rose-200">
+                                    <div className="mt-3 flex items-center gap-2 text-[11px] font-medium text-rose-600 bg-rose-50 px-3 py-1.5 rounded-md border border-rose-100">
                                         <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                                         </svg>

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatTitle, formatSpecValue, getDocStatus } from '../utils/helpers.jsx';
 import { FLEET_API, SOL_API } from '../config/api.js';
 import { useApiClient } from '../hooks/useApiClient.js';
+import { useRole } from '../hooks/useRole.js';
 import DocumentReviewModal from './DocumentReviewModal.jsx';
 
 export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, onClose, autoOpenReviewTrigger = 0 }) {
@@ -11,6 +12,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
     const [viewerRotation, setViewerRotation] = useState(0);
     const [hasAttemptedAutoOpen, setHasAttemptedAutoOpen] = useState(0);
     const { fetchWithAuth } = useApiClient();
+    const { isEditor } = useRole();
 
     const { data: docs = [], isLoading: isLoadingDocs, refetch: refetchDocs } = useQuery({
         queryKey: ['documents', vehicle?.id],
@@ -169,6 +171,22 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                     </svg>
                                                     <span>VER ARCHIVO</span>
                                                 </button>
+                                                {isEditor && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setViewerScale(1);
+                                                            setViewerRotation(0);
+                                                            setViewingDoc(doc);
+                                                        }}
+                                                        className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 hover:border-amber-300 px-2.5 py-1 rounded-md hover:bg-amber-100 transition-colors shadow-sm active:scale-95"
+                                                        title="Editar datos manualmente sin IA"
+                                                    >
+                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                        <span>EDITAR DATOS</span>
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={async () => {
                                                         try {

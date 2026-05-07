@@ -42,10 +42,6 @@ export default function LoginScreen() {
         </button>
       </div>
 
-      {/* Footer */}
-      <p className="mt-6 text-xs text-gray-400">
-        © {new Date().getFullYear()} Gestión Flota
-      </p>
     </div>
   );
 }

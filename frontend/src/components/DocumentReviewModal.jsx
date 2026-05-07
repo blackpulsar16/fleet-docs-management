@@ -113,7 +113,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
 
     return (
         <div className="fixed inset-0 z-[100] bg-gray-900/95 backdrop-blur-md flex flex-col md:flex-row p-4 md:p-6 gap-6 animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-4 duration-300 ease-out">
-            <div className="flex-1 bg-gray-950 rounded-md border border-gray-800 shadow-xl overflow-hidden relative flex flex-col">
+            <div className="flex-1 bg-gray-950 rounded-md border border-gray-800 shadow-sm overflow-hidden relative flex flex-col">
                 <div className="px-5 py-3 border-b border-gray-200 flex justify-between items-center bg-white shrink-0 z-20">
                     <div className="flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
@@ -137,7 +137,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
 
                     {/* IMAGE CONTROLS */}
                     {doc.file_url?.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) && (
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-md border border-gray-700/80 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0">
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-md border border-gray-700/80 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0">
                             <button onClick={() => setViewerScale(s => Math.max(0.5, s - 0.25))} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-all active:scale-95" title="Alejar">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
                             </button>
@@ -164,7 +164,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                                     transform: `scale(${viewerScale}) rotate(${viewerRotation}deg)`,
                                     transition: 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)'
                                 }}
-                                className="max-w-full max-h-full object-contain origin-center ring-1 ring-white/10 shadow-2xl rounded"
+                                className="max-w-full max-h-full object-contain origin-center ring-1 ring-white/10 shadow-sm rounded"
                             />
                         ) : (
                             <iframe
@@ -177,7 +177,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                 </div>
             </div>
 
-            <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 bg-gray-50 rounded-md shadow-xl flex flex-col overflow-hidden relative border border-gray-200">
+            <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 bg-gray-50 rounded-md shadow-sm flex flex-col overflow-hidden relative border border-gray-200">
                 <div className="px-6 py-5 border-b border-gray-200 flex flex-col bg-white z-10">
                     <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-medium text-gray-800 tracking-tight truncate pr-4" title={formatTitle(doc.doc_type)}>

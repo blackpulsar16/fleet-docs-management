@@ -31,18 +31,18 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
     return (
         <div className="fixed inset-0 z-[300] bg-gray-900/95 backdrop-blur-md flex flex-col md:flex-row p-3 gap-2 animate-in fade-in duration-200">
             {/* File pane */}
-            <div className="flex-1 bg-gray-950 rounded-2xl border border-gray-700/50 flex flex-col overflow-hidden">
+            <div className="flex-1 bg-gray-950 rounded-md border border-gray-700/50 flex flex-col overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-800 flex items-center justify-between bg-gray-900 shrink-0">
                     <div className="flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                        <span className="text-gray-200 font-bold text-sm">{formatTitle(docType)}</span>
+                        <span className="text-gray-200 font-medium text-sm">{formatTitle(docType)}</span>
                         <span className="text-gray-500 text-xs">·</span>
                         <span className="text-gray-400 text-xs font-mono">{vehicleId}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         {doc?.file_url && (
                             <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                                className="text-xs font-bold text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-700 transition-colors flex items-center gap-1.5">
+                                className="text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-md border border-gray-700 transition-colors flex items-center gap-1.5">
                                 Abrir externo
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                             </a>
@@ -61,7 +61,7 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
                             ? <div className="w-full h-full overflow-auto flex items-center justify-center p-4">
                                 <img src={doc.file_url} alt={docType}
                                     style={{ transform: `scale(${scale}) rotate(${rotation}deg)`, transition: 'transform 0.3s ease' }}
-                                    className="max-w-full max-h-full object-contain origin-center shadow-2xl rounded" />
+                                    className="max-w-full max-h-full object-contain origin-center shadow-sm rounded" />
                               </div>
                             : <iframe src={doc.file_url} className="w-full h-full border-0 absolute inset-0 bg-white" title="Visor PDF" />
                     )}
@@ -70,28 +70,28 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
 
             {/* Meta pane */}
             {!isLoading && doc && (
-                <div className="w-full md:w-[380px] shrink-0 bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden shadow-2xl">
+                <div className="w-full md:w-[380px] shrink-0 bg-white rounded-md border border-gray-200 flex flex-col overflow-hidden shadow-sm">
                     <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
                         <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Datos OCR</p>
-                        <p className="text-base font-semibold text-gray-800 mt-0.5">{formatTitle(docType)}</p>
+                        <p className="text-base font-medium text-gray-800 mt-0.5">{formatTitle(docType)}</p>
                     </div>
                     <div className="flex-1 overflow-y-auto p-5 custom-scrollbar flex flex-col gap-3">
                         {Object.entries(doc.data || {}).map(([k, v]) => {
                             const isObj = v !== null && typeof v === 'object' && !Array.isArray(v);
                             return (
                                 <div key={k} className="flex flex-col border-b border-gray-100 pb-3 last:border-0">
-                                    <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">{formatTitle(k)}</span>
+                                    <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 mb-1">{formatTitle(k)}</span>
                                     {isObj ? (
                                         <div className="flex flex-col gap-1.5 pl-2 border-l-2 border-gray-100 mt-1">
                                             {Object.entries(v).map(([sk, sv]) => (
                                                 <div key={sk} className="flex flex-col">
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">{formatTitle(sk)}</span>
-                                                    <span className="text-sm font-bold text-gray-700 leading-snug break-all">{String(sv ?? 'N/A')}</span>
+                                                    <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400">{formatTitle(sk)}</span>
+                                                    <span className="text-sm font-medium text-gray-700 leading-snug break-all">{String(sv ?? 'N/A')}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <span className="text-sm font-bold text-gray-700 leading-snug break-all">{String(v ?? 'N/A')}</span>
+                                        <span className="text-sm font-medium text-gray-700 leading-snug break-all">{String(v ?? 'N/A')}</span>
                                     )}
                                 </div>
                             );
@@ -109,10 +109,10 @@ function SourceChip({ label, value, isGround }) {
         <div className={`flex flex-col min-w-0 px-2.5 py-1.5 rounded border ${
             isGround ? 'bg-gray-100 border-gray-300' : 'bg-white border-gray-200'
         }`}>
-            <span className="text-[8px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-1 truncate">
+            <span className="text-[8px] font-medium uppercase tracking-widest text-gray-400 leading-none mb-1 truncate">
                 {label}{isGround && <span className="ml-1 text-gray-500">★</span>}
             </span>
-            <span className="text-[11px] font-bold text-gray-800 font-mono break-all leading-snug">
+            <span className="text-[11px] font-medium text-gray-800 font-mono break-all leading-snug">
                 {value}
             </span>
         </div>
@@ -163,7 +163,7 @@ function CharDiff({ value, reference }) {
     const netMissing  = missingSegs.length - extraCount;
 
     return (
-        <span className="font-mono text-[11px] font-bold break-all leading-snug">
+        <span className="font-mono text-[11px] font-medium break-all leading-snug">
             {segments.map((seg, idx) => {
                 if (seg.type === 'match') {
                     return <span key={idx} className="text-gray-700">{seg.char}</span>;
@@ -203,7 +203,7 @@ function DiscrepancyDetail({ discrepancies, matching = [] }) {
                 {/* Field label */}
                 <div className="w-36 shrink-0 pt-0.5 flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-0.5 ${isMismatch ? 'bg-rose-400' : 'bg-emerald-400'}`} />
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">{d.label}</span>
+                    <span className="text-[10px] font-medium uppercase tracking-widest text-gray-500">{d.label}</span>
                 </div>
 
                 {/* Sources */}
@@ -212,12 +212,12 @@ function DiscrepancyDetail({ discrepancies, matching = [] }) {
                         const hasDiff = isMismatch && norm(value) !== norm(groundVal);
                         return (
                             <div key={srcLabel} className="flex flex-col min-w-0 px-2.5 py-1.5 rounded border bg-white border-gray-200">
-                                <span className="text-[8px] font-bold uppercase tracking-widest leading-none mb-1 text-gray-400">
+                                <span className="text-[8px] font-medium uppercase tracking-widest leading-none mb-1 text-gray-400">
                                     {srcLabel}{srcLabel === groundLabel && <span className="ml-1 text-gray-400">★</span>}
                                 </span>
                                 {hasDiff
                                     ? <CharDiff value={value} reference={groundVal} />
-                                    : <span className="font-mono text-[11px] font-bold text-gray-700 break-all leading-snug">{value}</span>
+                                    : <span className="font-mono text-[11px] font-medium text-gray-700 break-all leading-snug">{value}</span>
                                 }
                             </div>
                         );
@@ -296,7 +296,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                         Vista Discrepancias
                     </span>
                     <div className="w-px h-4 bg-gray-200" />
-                    <span className="text-sm font-semibold text-gray-800">
+                    <span className="text-sm font-medium text-gray-800">
                         Validación cruzada OCR
                     </span>
                     {!isLoading && data && (
@@ -335,7 +335,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
             {/* Exit button — top-right corner */}
             <button
                 onClick={onClose}
-                className="absolute top-2 right-3 z-20 flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-500 text-xs font-medium hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all shadow-sm active:scale-95"
+                className="absolute top-2 right-3 z-20 flex items-center gap-2 px-4 py-2 rounded-md bg-gray-100 border border-gray-300 text-gray-500 text-xs font-medium hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all shadow-sm active:scale-95"
             >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 Salir vista
@@ -358,7 +358,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                     <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm font-semibold">
+                    <span className="text-sm font-medium">
                         {search ? 'Sin resultados para esa búsqueda' : 'Sin discrepancias detectadas'}
                     </span>
                     {!search && (
@@ -370,7 +370,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
             ) : (
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {/* Table header */}
-                    <div className="flex-shrink-0 grid bg-gray-50 border-b border-gray-200 text-[10px] font-semibold uppercase tracking-widest text-gray-400"
+                    <div className="flex-shrink-0 grid bg-gray-50 border-b border-gray-200 text-[10px] font-medium uppercase tracking-widest text-gray-400"
                         style={{ gridTemplateColumns: '10rem 1fr 10rem 6rem' }}>
                         <button
                             onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
@@ -413,7 +413,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                                             </svg>
-                                            <span className="font-semibold text-gray-800 text-sm">{v.vehicle_id}</span>
+                                            <span className="font-medium text-gray-800 text-sm">{v.vehicle_id}</span>
                                         </div>
 
                                         {/* Field tags — mismatches + matching */}
@@ -429,7 +429,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                                             )}
                                             {matchingLabels.map(lbl => (
                                                 <span key={lbl}
-                                                    className="text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-700 whitespace-nowrap opacity-80">
+                                                    className="text-[9px] font-medium uppercase tracking-wide px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-700 whitespace-nowrap opacity-80">
                                                     ✓ {lbl}
                                                 </span>
                                             ))}
@@ -437,16 +437,16 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
 
                                         {/* UN */}
                                         <div className="px-4 py-3 flex items-center">
-                                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                                            <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
                                                 {un}
                                             </span>
                                         </div>
 
                                         {/* Count */}
                                         <div className="px-4 py-3 text-right flex flex-col items-end justify-center gap-0.5">
-                                            <span className="text-sm font-semibold text-rose-600 tabular-nums leading-none">{v.count}</span>
+                                            <span className="text-sm font-medium text-rose-600 tabular-nums leading-none">{v.count}</span>
                                             {matchingLabels.length > 0 && (
-                                                <span className="text-[10px] font-bold text-emerald-600 tabular-nums leading-none">{matchingLabels.length} ✓</span>
+                                                <span className="text-[10px] font-medium text-emerald-600 tabular-nums leading-none">{matchingLabels.length} ✓</span>
                                             )}
                                         </div>
                                     </button>
@@ -479,7 +479,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                                                             <button
                                                                 key={docType}
                                                                 onClick={() => setViewing({ vehicleId: v.vehicle_id, docType })}
-                                                                className="flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-[10px] font-bold text-gray-600 transition-all active:scale-95 shadow-sm"
+                                                                className="flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-[10px] font-medium text-gray-600 transition-all active:scale-95 shadow-sm"
                                                             >
                                                                 <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -501,7 +501,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
 
                     {/* Footer */}
                     <div className="flex-shrink-0 px-5 py-2 border-t border-gray-100 bg-white flex items-center gap-4">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                        <span className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
                             {filtered.length} vehículo{filtered.length !== 1 ? 's' : ''} · {totalDiscrepancies} diferencia{totalDiscrepancies !== 1 ? 's' : ''} total
                         </span>
                         <span className="text-[10px] text-gray-300">·</span>

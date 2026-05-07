@@ -71,7 +71,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                 <div className="flex flex-col gap-1.5 mt-1 bg-gray-50/70 rounded-md p-3 border border-gray-100 w-full min-w-0">
                     {Object.entries(value).map(([k, v]) => (
                         <div key={k} className="flex flex-row flex-wrap items-baseline gap-x-1.5 text-xs leading-relaxed w-full min-w-0">
-                            <span className="font-extrabold text-gray-800 shrink-0 max-w-full break-words">{formatTitle(k)}:</span>
+                            <span className="font-medium text-gray-800 shrink-0 max-w-full break-words">{formatTitle(k)}:</span>
                             <span className="flex-1 text-gray-600 font-medium break-words overflow-wrap-anywhere min-w-0">{renderValue(v)}</span>
                         </div>
                     ))}
@@ -90,7 +90,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
             return (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pt-4">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex flex-col bg-white p-5 rounded-2xl border border-gray-200 animate-pulse">
+                        <div key={i} className="flex flex-col bg-white p-5 rounded-md border border-gray-200 animate-pulse">
                             <div className="flex justify-between items-start pb-4 border-b border-dashed border-gray-200 mb-4">
                                 <div className="flex flex-col gap-2 w-full pr-3">
                                     <div className="h-5 bg-gray-200 rounded w-3/4"></div>
@@ -107,7 +107,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 ))}
                             </div>
                             <div className="mt-auto pt-4 border-t border-gray-100 ">
-                                <div className="h-8 bg-gray-100 rounded-xl w-full"></div>
+                                <div className="h-8 bg-gray-100 rounded-md w-full"></div>
                             </div>
                         </div>
                     ))}
@@ -135,7 +135,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         if (!doc) return null;
                         const docStatus = getDocStatus(doc);
 
-                        let cardStyle = "border-gray-200 hover:border-blue-300 hover:shadow-md bg-white ";
+                        let cardStyle = "border-gray-200 hover:border-blue-300 hover:shadow-sm bg-white ";
                         let badge = <span className="text-emerald-700 px-2.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide border border-emerald-200 bg-emerald-50">OK</span>;
                         
                         if (doc.status === 'pending_review') {
@@ -153,7 +153,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                             <div key={doc.id || Math.random()} className={`flex flex-col p-4 rounded-md border transition-all duration-200 ${cardStyle}`}>
                                 <div className="flex justify-between items-start pb-4 border-b border-dashed border-gray-200 mb-4">
                                     <div className="flex flex-col gap-2.5 pr-3 min-w-0">
-                                        <span className="font-semibold text-gray-800 text-base leading-tight truncate" title={formatTitle(doc.doc_type)}>{formatTitle(doc.doc_type)}</span>
+                                        <span className="font-medium text-gray-800 text-base leading-tight truncate" title={formatTitle(doc.doc_type)}>{formatTitle(doc.doc_type)}</span>
                                         {/*<span className="text-[11px] text-gray-400 font-mono font-medium opacity-80 mb-1.5">ID: {doc.id || 'N/A'}</span>*/}
                                         {doc.file_url && (
                                             <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
@@ -163,7 +163,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                         setViewerRotation(0);
                                                         setViewingDoc(doc);
                                                     }}
-                                                    className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-100 hover:border-blue-300 px-2 py-0.5 rounded-md hover:bg-blue-100 transition-colors shadow-sm active:scale-95"
+                                                    className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-medium text-blue-600 bg-blue-50 border border-blue-100 hover:border-blue-300 px-2 py-0.5 rounded-md hover:bg-blue-100 transition-colors shadow-sm active:scale-95"
                                                     title="Visualizar documento en pantalla dividida"
                                                 >
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                             console.error('Error descargando archivo:', err);
                                                         }
                                                     }}
-                                                    className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-bold text-gray-500 bg-gray-50 border border-gray-200 hover:border-gray-300 px-2 py-0.5 rounded-md hover:bg-gray-100 transition-colors shadow-sm active:scale-95"
+                                                    className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-medium text-gray-500 bg-gray-50 border border-gray-200 hover:border-gray-300 px-2 py-0.5 rounded-md hover:bg-gray-100 transition-colors shadow-sm active:scale-95"
                                                     title="Descargar archivo"
                                                 >
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,7 +204,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                                             setViewerRotation(0);
                                                             setViewingDoc(doc);
                                                         }}
-                                                        className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-100 hover:border-amber-300 px-2 py-0.5 rounded-md hover:bg-amber-100 transition-colors shadow-sm active:scale-95"
+                                                        className="inline-flex items-center gap-1 whitespace-nowrap text-[9px] font-medium text-amber-600 bg-amber-50 border border-amber-100 hover:border-amber-300 px-2 py-0.5 rounded-md hover:bg-amber-100 transition-colors shadow-sm active:scale-95"
                                                         title="Editar datos manualmente sin IA"
                                                     >
                                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,8 +225,8 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                     <div className="flex flex-col gap-y-3 mb-4 mt-2">
                                         {Object.entries(doc.data || {}).filter(([_, val]) => typeof val !== 'object' || val === null).map(([key, value]) => (
                                             <div key={key} className="flex flex-col w-full border-b border-gray-100/60 pb-2.5 last:border-0 last:pb-0">
-                                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-0.5" title={formatTitle(key)}>{formatTitle(key)}</span>
-                                                <div className="text-[13px] font-bold text-gray-700 break-words leading-snug">
+                                                <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wide mb-0.5" title={formatTitle(key)}>{formatTitle(key)}</span>
+                                                <div className="text-[13px] font-medium text-gray-700 break-words leading-snug">
                                                     {renderValue(value)}
                                                 </div>
                                             </div>
@@ -237,7 +237,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                         <div className="flex flex-col gap-3 mt-auto pt-4 border-t border-gray-100/80">
                                             {Object.entries(doc.data || {}).filter(([_, val]) => typeof val === 'object' && val !== null).map(([key, value]) => (
                                                 <div key={key} className="flex flex-col min-w-0">
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1" title={formatTitle(key)}>{formatTitle(key)}</span>
+                                                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1" title={formatTitle(key)}>{formatTitle(key)}</span>
                                                     <div className="w-full min-w-0">
                                                         {renderValue(value)}
                                                     </div>
@@ -260,7 +260,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         >
                             <div className="flex justify-between items-start pb-4 border-b border-dashed border-rose-100 mb-4">
                                 <div className="flex flex-col gap-1 pr-3 overflow-hidden">
-                                    <span className="font-extrabold text-gray-500 text-lg leading-tight truncate" title={formatTitle(docName)}>
+                                    <span className="font-medium text-gray-500 text-lg leading-tight truncate" title={formatTitle(docName)}>
                                         {formatTitle(docName)}
                                     </span>
                                 </div>
@@ -274,7 +274,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 <svg className="w-10 h-10 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span className="text-xs font-bold text-rose-400 uppercase tracking-widest">Sin documento</span>
+                                <span className="text-xs font-medium text-rose-400 uppercase tracking-widest">Sin documento</span>
                             </div>
                         </div>
                     ))}
@@ -294,7 +294,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
         if (isLoadingSpecs) {
             return (
                 <div className="pt-4 flex flex-col gap-6 animate-pulse">
-                    <div className="h-[240px] w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-7">
+                    <div className="h-[240px] w-full bg-white rounded-md border border-gray-200 shadow-sm p-7">
                         <div className="flex justify-between items-start pb-6 border-b border-gray-100 ">
                             <div className="flex gap-10">
                                 <div><div className="h-3 bg-gray-200 rounded w-16 mb-2"></div><div className="h-8 bg-gray-200 rounded w-32"></div></div>
@@ -311,7 +311,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                             ))}
                         </div>
                     </div>
-                    <div className="h-[200px] w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-7">
+                    <div className="h-[200px] w-full bg-white rounded-md border border-gray-200 shadow-sm p-7">
                         <div className="h-4 bg-gray-200 rounded w-32 mb-8"></div>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-8">
                             {[...Array(12)].map((_, i) => (
@@ -336,31 +336,31 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         <div className="flex justify-between items-start pb-6 border-b border-gray-100 relative z-10">
                             <div className="flex gap-10 items-center">
                                 <div className="flex flex-col gap-1">
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Placas</div>
-                                    <div className="text-2xl font-semibold text-gray-800 tracking-tight">{formatSpecValue(specs.Placas)}</div>
+                                    <div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Placas</div>
+                                    <div className="text-2xl font-medium text-gray-800 tracking-tight">{formatSpecValue(specs.Placas)}</div>
                                 </div>
                                 <div className="w-px h-12 bg-gray-200 "></div>
                                 <div className="flex flex-col gap-1">
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Serie (VIN)</div>
-                                    <div className="text-xl font-bold text-gray-600 font-mono tracking-wide mt-1">{formatSpecValue(specs.Serie)}</div>
+                                    <div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Serie (VIN)</div>
+                                    <div className="text-xl font-medium text-gray-600 font-mono tracking-wide mt-1">{formatSpecValue(specs.Serie)}</div>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-1.5">
-                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estatus SOL</div>
-                                <div className="bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-lg text-xs font-bold border border-indigo-100/50 shadow-sm">
+                                <div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Estatus SOL</div>
+                                <div className="bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-md text-xs font-medium border border-indigo-100/50 shadow-sm">
                                     {formatSpecValue(specs.Estatus)}
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex flex-wrap gap-x-12 gap-y-6 relative z-10">
-                            <div className="flex flex-col"><div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Unidad de Negocio</div><div className="text-[15px] font-bold text-gray-700 ">{formatSpecValue(specs.UN)}</div></div>
-                            <div className="flex flex-col"><div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Marca Automotriz</div><div className="text-[15px] font-bold text-gray-700 ">{formatSpecValue(specs.Marca)}</div></div>
-                            <div className="flex flex-col"><div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Modelo</div><div className="text-[15px] font-bold text-gray-700 ">{formatSpecValue(specs.Modelo)}</div></div>
-                            <div className="flex flex-col"><div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Tipo Vehículo</div><div className="text-[15px] font-bold text-gray-700 ">{formatSpecValue(specs['Tipo vehiculo'])}</div></div>
+                            <div className="flex flex-col"><div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1.5">Unidad de Negocio</div><div className="text-[15px] font-medium text-gray-700 ">{formatSpecValue(specs.UN)}</div></div>
+                            <div className="flex flex-col"><div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1.5">Marca Automotriz</div><div className="text-[15px] font-medium text-gray-700 ">{formatSpecValue(specs.Marca)}</div></div>
+                            <div className="flex flex-col"><div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1.5">Modelo</div><div className="text-[15px] font-medium text-gray-700 ">{formatSpecValue(specs.Modelo)}</div></div>
+                            <div className="flex flex-col"><div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1.5">Tipo Vehículo</div><div className="text-[15px] font-medium text-gray-700 ">{formatSpecValue(specs['Tipo vehiculo'])}</div></div>
                             <div className="flex flex-col">
-                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Empleado Asignado</div>
-                                <div className="text-[15px] font-bold text-gray-700 flex items-center gap-3">
+                                <div className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1.5">Empleado Asignado</div>
+                                <div className="text-[15px] font-medium text-gray-700 flex items-center gap-3">
                                     {formatSpecValue(specs.Empleado)}
                                     <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-200 ">Nomina: {formatSpecValue(specs.Nomina)}</span>
                                 </div>
@@ -370,14 +370,14 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
 
                     {/* Detailed Spec Grid */}
                     <div className="bg-white p-6 rounded-md border border-gray-200">
-                        <h4 className="text-sm font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <h4 className="text-sm font-medium text-gray-800 mb-6 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Datos Extendidos
                         </h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-8">
                             {Object.entries(specs).map(([k, v]) => (
                                 !heroKeys.includes(k) && (
                                     <div key={k} className="flex flex-col group">
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 transition-colors group-hover:text-blue-500 ">{k}</span>
+                                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1.5 transition-colors group-hover:text-blue-500 ">{k}</span>
                                         <span className="text-sm font-medium text-gray-700 break-words">{formatSpecValue(v)}</span>
                                     </div>
                                 )
@@ -404,7 +404,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
             return (
                 <div className="pt-4 flex flex-col gap-4 animate-pulse">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="h-28 bg-gray-100 rounded-xl border border-gray-200" />
+                        <div key={i} className="h-28 bg-gray-100 rounded-md border border-gray-200" />
                     ))}
                 </div>
             );
@@ -538,7 +538,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         {mismatches > 0 ? '🚨' : allOk ? '✅' : '⚠️'}
                     </span>
                     <div className="flex flex-col">
-                        <span className={`text-sm font-semibold tracking-wide ${
+                        <span className={`text-sm font-medium tracking-wide ${
                             mismatches > 0 ? 'text-rose-800' : allOk ? 'text-emerald-800' : 'text-amber-800'
                         }`}>
                             {mismatches > 0
@@ -550,7 +550,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         </span>
                         <span className="text-xs text-gray-500 mt-0.5">
                             Fuente de verdad: <strong>Carta Factura</strong> · Fallback: SOL
-                            {!bill && <span className="ml-2 text-amber-600 font-bold">⚠ Sin Carta Factura — usando SOL</span>}
+                            {!bill && <span className="ml-2 text-amber-600 font-medium">⚠ Sin Carta Factura — usando SOL</span>}
                         </span>
                     </div>
                 </div>
@@ -572,11 +572,11 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 </div>
 
                                 {/* Ground truth value */}
-                                <div className="mb-3 p-3 rounded-lg bg-white/80 border border-white shadow-sm">
-                                    <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                <div className="mb-3 p-3 rounded-md bg-white/80 border border-white shadow-sm">
+                                    <div className="text-[9px] font-medium text-gray-400 uppercase tracking-widest mb-1">
                                         Valor usado · {gtLabel}
                                     </div>
-                                    <div className="text-sm font-semibold text-gray-800 font-mono tracking-wide break-all">
+                                    <div className="text-sm font-medium text-gray-800 font-mono tracking-wide break-all">
                                         {gtVal ?? <span className="text-gray-400 italic font-normal text-sm">Sin datos</span>}
                                     </div>
                                 </div>
@@ -586,15 +586,15 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                     {comparisons.map(({ label: srcLabel, value }) => {
                                         const isMismatch = value != null && gtVal != null && norm(value) !== norm(gtVal);
                                         return (
-                                            <div key={srcLabel} className={`flex flex-col p-2 rounded-lg border ${
+                                            <div key={srcLabel} className={`flex flex-col p-2 rounded-md border ${
                                                 isMismatch
                                                     ? 'bg-rose-50/80 border-rose-200'
                                                     : value != null
                                                         ? 'bg-white/60 border-gray-200/60'
                                                         : 'bg-gray-50/40 border-gray-100'
                                             }`}>
-                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 leading-tight">{srcLabel}</span>
-                                                <span className={`text-[11px] font-bold break-all leading-snug ${
+                                                <span className="text-[8px] font-medium text-gray-400 uppercase tracking-widest mb-1 leading-tight">{srcLabel}</span>
+                                                <span className={`text-[11px] font-medium break-all leading-snug ${
                                                     isMismatch ? 'text-rose-700' : value != null ? 'text-gray-700' : 'text-gray-300 italic font-normal'
                                                 }`}>
                                                     {value ?? 'Sin dato'}
@@ -607,7 +607,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                 </div>
 
                                 {cardStatus === 'mismatch' && (
-                                    <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-rose-700 bg-rose-100/60 px-3 py-1.5 rounded-lg border border-rose-200">
+                                    <div className="mt-3 flex items-center gap-2 text-[11px] font-medium text-rose-700 bg-rose-100/60 px-3 py-1.5 rounded-md border border-rose-200">
                                         <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                                         </svg>
@@ -622,7 +622,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                 {/* Legend */}
                 <div className="flex flex-wrap gap-3 pt-1">
                     {Object.entries(statusConfig).map(([key, cfg]) => (
-                        <div key={key} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-bold ${cfg.badge}`}>
+                        <div key={key} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[10px] font-medium ${cfg.badge}`}>
                             <span>{cfg.icon}</span> {cfg.label}
                         </div>
                     ))}
@@ -650,7 +650,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                         {activeTab === 'spec' && <div className="absolute -bottom-[2px] left-0 right-0 h-[3px] bg-blue-600 rounded-t-full shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>}
                     </button>
                     <button
-                        className={`pb-3 text-xs font-black tracking-widest relative transition-colors flex items-center gap-1.5 ${
+                        className={`pb-3 text-xs font-medium tracking-widest relative transition-colors flex items-center gap-1.5 ${
                             activeTab === 'validation' ? 'text-violet-600' : 'text-gray-400 hover:text-gray-600'
                         }`}
                         onClick={() => onTabChange('validation')}

@@ -41,7 +41,7 @@ function DaysBadge({ days, colKey }) {
         missing:  'text-gray-400 border-gray-200',
     };
     return (
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border whitespace-nowrap bg-transparent ${map[colKey] || 'text-gray-500 border-gray-200'}`}>
+        <span className={`text-[10px] font-medium px-2 py-0.5 rounded border whitespace-nowrap bg-transparent ${map[colKey] || 'text-gray-500 border-gray-200'}`}>
             {formatDaysLeft(days)}
         </span>
     );
@@ -67,18 +67,18 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
     return (
         <div className="fixed inset-0 z-[300] bg-gray-900/95 backdrop-blur-md flex flex-col md:flex-row p-3 gap-2 animate-in fade-in duration-200">
             {/* File pane */}
-            <div className="flex-1 bg-gray-950 rounded-2xl border border-gray-700/50 flex flex-col overflow-hidden">
+            <div className="flex-1 bg-gray-950 rounded-md border border-gray-700/50 flex flex-col overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-800 flex items-center justify-between bg-gray-900 shrink-0">
                     <div className="flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                        <span className="text-gray-200 font-bold text-sm">{formatTitle(docType)}</span>
+                        <span className="text-gray-200 font-medium text-sm">{formatTitle(docType)}</span>
                         <span className="text-gray-500 text-xs">·</span>
                         <span className="text-gray-400 text-xs font-mono">{vehicleId}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         {doc?.file_url && (
                             <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                                className="text-xs font-bold text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-700 transition-colors flex items-center gap-1.5">
+                                className="text-xs font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-md border border-gray-700 transition-colors flex items-center gap-1.5">
                                 Abrir externo
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                             </a>
@@ -109,30 +109,30 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
                                         src={doc.file_url}
                                         alt={docType}
                                         style={{ transform: `scale(${scale}) rotate(${rotation}deg)`, transition: 'transform 0.3s ease' }}
-                                        className="max-w-full max-h-full object-contain origin-center shadow-2xl rounded"
+                                        className="max-w-full max-h-full object-contain origin-center shadow-sm rounded"
                                     />
                                 </div>
                             ) : (
                                 <iframe src={doc.file_url} className="w-full h-full border-0 absolute inset-0 bg-white" title="Visor PDF" />
                             )}
                             {doc.file_url.match(/\.(jpeg|jpg|png|gif|webp)(\?|$)/i) && (
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-gray-700/80 shadow-lg">
-                                    <button onClick={() => setScale(s => Math.max(0.5, s - 0.25))} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-md border border-gray-700/80 shadow-sm">
+                                    <button onClick={() => setScale(s => Math.max(0.5, s - 0.25))} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
                                     </button>
-                                    <span className="text-[11px] font-mono font-black text-gray-300 w-10 text-center">{Math.round(scale * 100)}%</span>
-                                    <button onClick={() => setScale(s => Math.min(4, s + 0.25))} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
+                                    <span className="text-[11px] font-mono font-medium text-gray-300 w-10 text-center">{Math.round(scale * 100)}%</span>
+                                    <button onClick={() => setScale(s => Math.min(4, s + 0.25))} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                                     </button>
                                     <div className="w-px h-5 bg-gray-700 mx-1" />
-                                    <button onClick={() => setRotation(r => r - 90)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
+                                    <button onClick={() => setRotation(r => r - 90)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                                     </button>
-                                    <button onClick={() => setRotation(r => r + 90)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
+                                    <button onClick={() => setRotation(r => r + 90)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
                                     </button>
                                     <div className="w-px h-5 bg-gray-700 mx-1" />
-                                    <button onClick={() => { setScale(1); setRotation(0); }} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
+                                    <button onClick={() => { setScale(1); setRotation(0); }} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                     </button>
                                 </div>
@@ -144,28 +144,28 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
 
             {/* Meta pane */}
             {!isLoading && doc && (
-                <div className="w-full md:w-[420px] shrink-0 bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden shadow-2xl min-w-0">
+                <div className="w-full md:w-[420px] shrink-0 bg-white rounded-md border border-gray-200 flex flex-col overflow-hidden shadow-sm min-w-0">
                     <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
                         <p className="text-xs font-medium uppercase tracking-widest text-gray-400">Datos OCR</p>
-                        <p className="text-base font-semibold text-gray-800 mt-0.5">{formatTitle(docType)}</p>
+                        <p className="text-base font-medium text-gray-800 mt-0.5">{formatTitle(docType)}</p>
                     </div>
                     <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 custom-scrollbar flex flex-col gap-3">
                         {Object.entries(doc.data || {}).map(([k, v]) => {
                             const isObj = v !== null && typeof v === 'object' && !Array.isArray(v);
                             return (
                                 <div key={k} className="flex flex-col border-b border-gray-100 pb-3 last:border-0 w-full" style={{minWidth:0}}>
-                                    <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1" style={{wordBreak:'break-word'}}>{formatTitle(k)}</span>
+                                    <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400 mb-1" style={{wordBreak:'break-word'}}>{formatTitle(k)}</span>
                                     {isObj ? (
                                         <div className="flex flex-col gap-1.5 pl-2 border-l-2 border-gray-100 mt-1">
                                             {Object.entries(v).map(([sk, sv]) => (
                                                 <div key={sk} className="flex flex-col">
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">{formatTitle(sk)}</span>
-                                                    <span className="text-sm font-bold text-gray-700 leading-snug" style={{wordBreak:'break-all'}}>{String(sv ?? 'N/A')}</span>
+                                                    <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400">{formatTitle(sk)}</span>
+                                                    <span className="text-sm font-medium text-gray-700 leading-snug" style={{wordBreak:'break-all'}}>{String(sv ?? 'N/A')}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <span className="text-sm font-bold text-gray-700 leading-snug" style={{wordBreak:'break-all'}}>{String(v ?? 'N/A')}</span>
+                                        <span className="text-sm font-medium text-gray-700 leading-snug" style={{wordBreak:'break-all'}}>{String(v ?? 'N/A')}</span>
                                     )}
                                 </div>
                             );
@@ -207,7 +207,7 @@ function DownloadGroupButton({ docType, state, count, fetchWithAuth }) {
 
     return (
         <button onClick={handleDownload} disabled={dlState === 'loading'}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium uppercase tracking-wider transition-all shadow-sm active:scale-95 ${colors[state]} ${dlState === 'loading' ? 'opacity-60 cursor-wait' : ''}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-medium uppercase tracking-wider transition-all shadow-sm active:scale-95 ${colors[state]} ${dlState === 'loading' ? 'opacity-60 cursor-wait' : ''}`}>
             {dlState === 'loading'
                 ? <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
                 : dlState === 'done'
@@ -286,13 +286,13 @@ export default function DocFilterView({ docType, docStateFilter, onClearFilter }
                         const canView = col.key !== 'missing';
                         return (
                             <div key={col.key}
-                                className={`flex flex-col flex-1 min-w-0 rounded-xl border ${col.border} ${col.colBg} overflow-hidden`}
+                                className={`flex flex-col flex-1 min-w-0 rounded-md border ${col.border} ${col.colBg} overflow-hidden`}
                             >
                                 {/* Col header */}
                                 <div className={`${col.headerBg} border-b border-gray-200 px-4 py-2.5 flex items-center justify-between shrink-0`}>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-semibold text-gray-600">{col.label}</span>
-                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{vehicles.length}</span>
+                                        <span className="text-xs font-medium text-gray-600">{col.label}</span>
+                                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{vehicles.length}</span>
                                         {col.key !== 'missing' && (
                                             <button
                                                 onClick={() => toggleSort(col.key)}
@@ -313,7 +313,7 @@ export default function DocFilterView({ docType, docStateFilter, onClearFilter }
                                     {vehicles.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center py-6 text-gray-400 gap-1.5 opacity-50">
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                            <span className="text-[11px] font-semibold">Sin vehículos</span>
+                                            <span className="text-[11px] font-medium">Sin vehículos</span>
                                         </div>
                                     ) : vehicles.map((v) => (
                                         <button
@@ -325,7 +325,7 @@ export default function DocFilterView({ docType, docStateFilter, onClearFilter }
                                             <div className={`w-1 shrink-0 ${col.accent}`} />
                                             {/* Content — two rows */}
                                             <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
-                                                <span className={`font-semibold text-base leading-tight ${col.idColor}`}>{v.id}</span>
+                                                <span className={`font-medium text-base leading-tight ${col.idColor}`}>{v.id}</span>
                                                 {v.days_left !== null && v.days_left !== undefined && (
                                                     <DaysBadge days={v.days_left} colKey={col.key} />
                                                 )}

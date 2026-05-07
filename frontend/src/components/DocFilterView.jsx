@@ -116,7 +116,7 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
                                 <iframe src={doc.file_url} className="w-full h-full border-0 absolute inset-0 bg-white" title="Visor PDF" />
                             )}
                             {doc.file_url.match(/\.(jpeg|jpg|png|gif|webp)(\?|$)/i) && (
-                                <div className="absolute bottom-6 left-1/2 -trangray-x-1/2 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-gray-700/80 shadow-lg">
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-gray-700/80 shadow-lg">
                                     <button onClick={() => setScale(s => Math.max(0.5, s - 0.25))} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
                                     </button>

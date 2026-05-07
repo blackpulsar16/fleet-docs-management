@@ -490,7 +490,7 @@ export default function FleetDashboard() {
 
                     {/* Search */}
                     <div className="relative">
-                        <svg className="absolute left-2.5 top-1/2 -trangray-y-1/2 w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" /></svg>
+                        <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" /></svg>
                         <input
                             type="text"
                             placeholder="Buscar ID o modelo..."
@@ -499,7 +499,7 @@ export default function FleetDashboard() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         {searchTerm && (
-                            <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -trangray-y-1/2 text-gray-500 hover:text-gray-300 leading-none text-sm">&times;</button>
+                            <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 leading-none text-sm">&times;</button>
                         )}
                     </div>
 
@@ -688,7 +688,7 @@ export default function FleetDashboard() {
 
                         {/* SCROLL MINIMAL INDICATOR */}
                         <div
-                            className={`absolute right-6 top-1/2 -trangray-y-1/2 flex items-center justify-center px-4 py-2 rounded-lg transition-all duration-300 ease-out z-30 pointer-events-none shadow-lg ${isScrolling && currentScrolledId ? 'opacity-100 trangray-x-0 scale-100' : 'opacity-0 trangray-x-4 scale-95'}`}
+                            className={`absolute right-6 top-1/2 -translate-y-1/2 flex items-center justify-center px-4 py-2 rounded-lg transition-all duration-300 ease-out z-30 pointer-events-none shadow-lg ${isScrolling && currentScrolledId ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-4 scale-95'}`}
                             style={{
                                 backgroundColor: 'rgba(15, 23, 42, 0.75)',
                                 backdropFilter: 'blur(8px)',

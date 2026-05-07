@@ -501,7 +501,7 @@ export default function FleetDashboard() {
                     <div className="flex flex-col gap-2">
                         <p className="text-[9px] font-medium uppercase tracking-widest text-gray-400 px-0.5">Vehículo</p>
                         <select
-                            className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
+                            className="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-md text-xs text-gray-600 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
                             value={unFilter}
                             onChange={(e) => setUnFilter(e.target.value)}
                         >

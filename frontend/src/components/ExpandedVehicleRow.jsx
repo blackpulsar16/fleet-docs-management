@@ -155,6 +155,7 @@ export default function ExpandedVehicleRow({ vehicle, activeTab, onTabChange, on
                                     <div className="flex flex-col gap-2.5 pr-3 min-w-0">
                                         <span className="font-semibold text-gray-800 text-base leading-tight truncate" title={formatTitle(doc.doc_type)}>{formatTitle(doc.doc_type)}</span>
                                         {/*<span className="text-[11px] text-gray-400 font-mono font-medium opacity-80 mb-1.5">ID: {doc.id || 'N/A'}</span>*/}
+                                        {doc.file_url && (
                                             <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                                                 <button
                                                     onClick={() => {

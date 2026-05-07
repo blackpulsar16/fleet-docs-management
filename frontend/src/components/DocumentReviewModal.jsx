@@ -181,7 +181,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                 <div className="px-6 py-5 border-b border-gray-200 flex flex-col bg-white z-10">
                     <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-medium text-gray-800 tracking-tight truncate pr-4" title={formatTitle(doc.doc_type)}>
-                            {doc.status === 'verified' ? '✅' : '👀'} Revisión
+                            Revisión
                         </h3>
                         <button
                             onClick={onClose}
@@ -219,7 +219,6 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                     {/* Extraction Notes Alert */}
                     {extractionNotes && (
                         <div className="mb-6 flex items-start gap-4 p-4 rounded-md bg-amber-50 border border-amber-200 text-amber-900 animate-in fade-in slide-in-from-top-2 duration-500">
-                            <span className="text-xl mt-0.5 opacity-80">💡</span>
                             <div className="flex flex-col gap-1.5">
                                 <span className="text-[11px] font-medium uppercase tracking-widest text-amber-700">Comentario de la IA</span>
                                 <span className="text-[13px] font-medium leading-relaxed">{extractionNotes}</span>

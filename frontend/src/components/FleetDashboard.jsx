@@ -454,7 +454,7 @@ export default function FleetDashboard() {
                 onClick={(e) => { e.stopPropagation(); handleSort(col); }}
                 className={`ml-1.5 inline-flex items-center justify-center rounded transition-all duration-150 ${active
                     ? 'text-blue-300 hover:text-blue-200'
-                    : 'text-slate-500 hover:text-slate-300'
+                    : 'text-gray-500 hover:text-gray-300'
                     }`}
                 title={`Ordenar por columna`}
             >
@@ -468,7 +468,13 @@ export default function FleetDashboard() {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans antialiased">
+        <div
+            className="flex h-screen overflow-hidden bg-white text-gray-800"
+            style={{
+                backgroundImage: 'radial-gradient(circle, #e2e4e8 1px, transparent 1px)',
+                backgroundSize: '20px 20px',
+            }}
+        >
 
             {/* ── SIDEBAR ── */}
             <aside className="w-56 flex-shrink-0 flex flex-col bg-gray-50 text-gray-700 border-r border-gray-200">
@@ -484,7 +490,7 @@ export default function FleetDashboard() {
 
                     {/* Search */}
                     <div className="relative">
-                        <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" /></svg>
+                        <svg className="absolute left-2.5 top-1/2 -trangray-y-1/2 w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" /></svg>
                         <input
                             type="text"
                             placeholder="Buscar ID o modelo..."
@@ -493,7 +499,7 @@ export default function FleetDashboard() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         {searchTerm && (
-                            <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 leading-none text-sm">&times;</button>
+                            <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -trangray-y-1/2 text-gray-500 hover:text-gray-300 leading-none text-sm">&times;</button>
                         )}
                     </div>
 
@@ -608,13 +614,13 @@ export default function FleetDashboard() {
                         <>
                             {/* Doc-filter KPIs */}
                             {[
-                                { label: 'Total',      value: activeStats.total,    num: 'text-slate-500'    },
+                                { label: 'Total',      value: activeStats.total,    num: 'text-gray-500'    },
                                 { label: 'Vigentes',   value: activeStats.ok,       num: 'text-emerald-600'  },
                                 { label: 'Por Vencer', value: activeStats.warning,  num: 'text-amber-500'    },
                                 { label: 'Crítico',    value: activeStats.critical, num: 'text-rose-500'     },
                             ].map(kpi => (
                                 <div key={kpi.label} className="flex flex-col items-start px-4 py-1.5 min-w-[68px]">
-                                    <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num}`}>{kpi.value ?? '…'}</span>
+                                    <span className={`text-2xl font-bold tabular-nums leading-none ${kpi.num}`}>{kpi.value ?? '…'}</span>
                                     <span className="text-[9px] font-medium uppercase tracking-widest mt-0.5 text-gray-400">{kpi.label}</span>
                                 </div>
                             ))}
@@ -640,7 +646,7 @@ export default function FleetDashboard() {
                         </>
                     ) : (
                         [
-                            { key: 'all',      label: 'Total',    value: stats.total,    num: 'text-slate-500',   activeBg: 'bg-slate-100'  },
+                            { key: 'all',      label: 'Total',    value: stats.total,    num: 'text-gray-500',   activeBg: 'bg-gray-100'  },
                             { key: 'ok',       label: 'Vigentes', value: stats.ok,       num: 'text-emerald-600', activeBg: 'bg-emerald-50' },
                             { key: 'warning',  label: 'Alerta',   value: stats.warning,  num: 'text-amber-500',   activeBg: 'bg-amber-50'   },
                             { key: 'critical', label: 'Crítico',  value: stats.critical, num: 'text-rose-500',    activeBg: 'bg-rose-50'    },
@@ -654,8 +660,8 @@ export default function FleetDashboard() {
                                         active ? kpi.activeBg : 'hover:bg-gray-50'
                                     }`}
                                 >
-                                    <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num} ${active ? '' : 'opacity-40'}`}>{kpi.value}</span>
-                                    <span className={`text-[9px] font-medium uppercase tracking-widest mt-0.5 ${active ? 'text-slate-500' : 'text-gray-400 opacity-50'}`}>{kpi.label}</span>
+                                    <span className={`text-2xl font-bold tabular-nums leading-none ${kpi.num} ${active ? '' : 'opacity-40'}`}>{kpi.value}</span>
+                                    <span className={`text-[9px] font-medium uppercase tracking-widest mt-0.5 ${active ? 'text-gray-500' : 'text-gray-400 opacity-50'}`}>{kpi.label}</span>
                                 </button>
                             );
                         })
@@ -682,7 +688,7 @@ export default function FleetDashboard() {
 
                         {/* SCROLL MINIMAL INDICATOR */}
                         <div
-                            className={`absolute right-6 top-1/2 -translate-y-1/2 flex items-center justify-center px-4 py-2 rounded-lg transition-all duration-300 ease-out z-30 pointer-events-none shadow-lg ${isScrolling && currentScrolledId ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-4 scale-95'}`}
+                            className={`absolute right-6 top-1/2 -trangray-y-1/2 flex items-center justify-center px-4 py-2 rounded-lg transition-all duration-300 ease-out z-30 pointer-events-none shadow-lg ${isScrolling && currentScrolledId ? 'opacity-100 trangray-x-0 scale-100' : 'opacity-0 trangray-x-4 scale-95'}`}
                             style={{
                                 backgroundColor: 'rgba(15, 23, 42, 0.75)',
                                 backdropFilter: 'blur(8px)',
@@ -720,14 +726,14 @@ export default function FleetDashboard() {
                                 </thead>
 
                                 {isLoadingFleet ? (
-                                    <tbody className="divide-y divide-slate-100 ">
+                                    <tbody className="divide-y divide-gray-100 ">
                                         {[...Array(12)].map((_, i) => (
                                             <tr key={i} className="animate-pulse bg-white ">
-                                                <td className="px-5 py-4"><div className="h-5 bg-slate-200 rounded w-16"></div></td>
-                                                <td className="px-4 py-4"><div className="h-6 bg-slate-100 rounded w-20"></div></td>
+                                                <td className="px-5 py-4"><div className="h-5 bg-gray-200 rounded w-16"></div></td>
+                                                <td className="px-4 py-4"><div className="h-6 bg-gray-100 rounded w-20"></div></td>
                                                 <td className="px-4 py-4"><div className="h-6 bg-indigo-50 rounded w-24"></div></td>
-                                                <td className="px-4 py-4"><div className="h-6 bg-slate-200 rounded w-14"></div></td>
-                                                <td className="px-5 py-4"><div className="flex gap-2"><div className="w-6 h-6 bg-slate-200 rounded-full"></div><div className="w-6 h-6 bg-slate-200 rounded-full"></div></div></td>
+                                                <td className="px-4 py-4"><div className="h-6 bg-gray-200 rounded w-14"></div></td>
+                                                <td className="px-5 py-4"><div className="flex gap-2"><div className="w-6 h-6 bg-gray-200 rounded-full"></div><div className="w-6 h-6 bg-gray-200 rounded-full"></div></div></td>
                                                 <td className="px-5 py-4">
                                                     <div className="flex gap-2">
                                                         <div className="h-5 bg-rose-100 rounded w-20"></div>
@@ -735,12 +741,12 @@ export default function FleetDashboard() {
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-4"><div className="h-6 bg-amber-50 rounded w-48"></div></td>
-                                                <td className="pl-5 pr-8 py-4 text-right"><div className="w-8 h-8 bg-slate-100 rounded-full ml-auto"></div></td>
+                                                <td className="pl-5 pr-8 py-4 text-right"><div className="w-8 h-8 bg-gray-100 rounded-full ml-auto"></div></td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 ) : (
-                                    <tbody className="divide-y divide-slate-100 ">
+                                    <tbody className="divide-y divide-gray-100 ">
                                         {filteredVehicles.map((vehicle) => {
                                             const isExpanded = selectedVehicle === vehicle.id;
 
@@ -801,16 +807,16 @@ export default function FleetDashboard() {
                                                                         </div>
                                                                     );
                                                                 })}
-                                                                {uniqueDocNames.length === 0 && <span className="text-slate-400 italic text-[11px] font-medium">Vacío</span>}
+                                                                {uniqueDocNames.length === 0 && <span className="text-gray-400 italic text-[11px] font-medium">Vacío</span>}
                                                             </div>
                                                         </td>
 
                                                         <td className="px-5 py-2 align-top">
                                                             <div className="flex flex-col gap-1 w-full max-w-[280px] pt-0.5">
                                                                 {missingList.map((issue, idx) => (
-                                                                    <div key={`m-${idx}`} className="flex items-center justify-between text-xs font-bold px-2.5 py-1 rounded border border-l-2 shadow-sm bg-white border-slate-200 border-l-slate-400 w-full max-w-[280px]">
-                                                                        <span className="truncate mr-3 text-slate-600 opacity-90" title={formatTitle(issue)}>{formatTitle(issue)}</span>
-                                                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wide whitespace-nowrap bg-slate-100 text-slate-600">Falta</span>
+                                                                    <div key={`m-${idx}`} className="flex items-center justify-between text-xs font-bold px-2.5 py-1 rounded border border-l-2 shadow-sm bg-white border-gray-200 border-l-gray-400 w-full max-w-[280px]">
+                                                                        <span className="truncate mr-3 text-gray-600 opacity-90" title={formatTitle(issue)}>{formatTitle(issue)}</span>
+                                                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide whitespace-nowrap bg-gray-100 text-gray-600">Falta</span>
                                                                     </div>
                                                                 ))}
                                                                 {expiringList.map((issue, idx) => {
@@ -818,14 +824,14 @@ export default function FleetDashboard() {
                                                                     return (
                                                                         <div key={`e-${idx}`} className={`flex items-center justify-between text-xs font-bold px-2.5 py-1 rounded border border-l-2 shadow-sm ${parsed.isExpired ? 'text-rose-800 bg-white border-rose-200 border-l-rose-500' : 'text-amber-800 bg-white border-amber-200 border-l-amber-500'}`}>
                                                                             <span className="truncate mr-3 opacity-90" title={parsed.docName}>{parsed.docName}</span>
-                                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wide whitespace-nowrap ${parsed.isExpired ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>
+                                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide whitespace-nowrap ${parsed.isExpired ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
                                                                                 {parsed.timeText}
                                                                             </span>
                                                                         </div>
                                                                     );
                                                                 })}
                                                                 {missingList.length === 0 && expiringList.length === 0 && (
-                                                                    <span className="text-slate-300 italic text-[11px]">-</span>
+                                                                    <span className="text-gray-300 italic text-[11px]">-</span>
                                                                 )}
                                                             </div>
                                                         </td>
@@ -838,8 +844,8 @@ export default function FleetDashboard() {
                                                                 className={`p-2 rounded-full transition-all duration-200 ${downloadingVehicleId === vehicle.id
                                                                     ? 'bg-emerald-100 text-emerald-500 cursor-wait'
                                                                     : downloadingVehicleId
-                                                                        ? 'text-slate-200 cursor-not-allowed'
-                                                                        : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 group-hover:bg-white group-hover:shadow-sm'
+                                                                        ? 'text-gray-200 cursor-not-allowed'
+                                                                        : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 group-hover:bg-white group-hover:shadow-sm'
                                                                     }`}
                                                             >
                                                                 {downloadingVehicleId === vehicle.id ? (
@@ -880,11 +886,11 @@ export default function FleetDashboard() {
 
                                         {filteredVehicles.length === 0 && !isLoadingFleet && (
                                             <tr>
-                                                <td colSpan={8} className="px-5 py-16 text-center text-slate-500 text-base bg-white rounded-b-xl border-t border-slate-100 ">
+                                                <td colSpan={8} className="px-5 py-16 text-center text-gray-400 text-base bg-white border-t border-gray-100">
                                                     <div className="flex flex-col items-center">
                                                         <span className="text-4xl mb-3 opacity-50">📋</span>
-                                                        <span className="font-semibold text-slate-600 ">No hay vehículos que coincidan</span>
-                                                        <span className="text-sm text-slate-400 mt-1">Intenta con otros filtros o término de búsqueda</span>
+                                                        <span className="font-semibold text-gray-600 ">No hay vehículos que coincidan</span>
+                                                        <span className="text-sm text-gray-400 mt-1">Intenta con otros filtros o término de búsqueda</span>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -900,8 +906,8 @@ export default function FleetDashboard() {
 
             {/* UPLOAD MODAL */}
             {isUploadModalOpen && (
-                <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300 transition-all ${uploadPhase === 'completed' ? 'bg-emerald-500 scale-105' : ''}`}>
+                <div className="fixed inset-0 z-[200] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className={`bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300 transition-all ${uploadPhase === 'completed' ? 'bg-emerald-500 scale-105' : ''}`}>
 
                         {uploadPhase === 'completed' ? (
                             <div className="p-14 min-h-[320px] flex flex-col items-center justify-center text-center animate-in zoom-in spin-in-12 duration-500">
@@ -909,21 +915,21 @@ export default function FleetDashboard() {
                                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-8 shadow-lg">
                                     <svg className="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>
                                 </div>
-                                <h2 className="text-2xl font-black text-white mb-2">¡Subida Exitosa!</h2>
+                                <h2 className="text-2xl font-semibold text-white mb-2">¡Subida Exitosa!</h2>
                                 <p className="text-emerald-100 font-medium mb-8">
                                     {uploadFiles.length > 1 ? `${uploadFiles.length} documentos guardados correctamente.` : 'El documento ha sido guardado.'}
                                 </p>
                                 <div className="flex gap-4">
                                     <button 
                                         onClick={handleStartValidation}
-                                        className="px-6 py-3 bg-white text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 active:scale-95 transition-all shadow-md flex items-center gap-2"
+                                        className="px-5 py-2.5 bg-white text-emerald-600 rounded-md font-semibold hover:bg-emerald-50 active:scale-95 transition-all shadow-sm flex items-center gap-2"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                                         Validar Documentos
                                     </button>
                                     <button 
                                         onClick={resetUploadModal}
-                                        className="px-6 py-3 bg-emerald-600/50 text-white rounded-xl font-bold hover:bg-emerald-600/70 active:scale-95 transition-all border border-emerald-400/30"
+                                        className="px-5 py-2.5 bg-emerald-600/50 text-white rounded-md font-semibold hover:bg-emerald-600/70 active:scale-95 transition-all border border-emerald-400/30"
                                     >
                                         Cerrar
                                     </button>
@@ -931,9 +937,9 @@ export default function FleetDashboard() {
                             </div>
                         ) : uploadPhase === 'uploading' ? (
                             <div className="flex flex-col min-h-[320px]">
-                                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
+                                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2 bg-gray-50">
                                     <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
-                                    <h3 className="text-sm font-black text-slate-800 tracking-wide">Procesando documentos...</h3>
+                                    <h3 className="text-sm font-semibold text-gray-800">Procesando documentos...</h3>
                                 </div>
                                 <div className="p-6 flex flex-col gap-3 overflow-y-auto max-h-[60vh] custom-scrollbar">
                                     {uploadFiles.map((f) => {
@@ -942,9 +948,9 @@ export default function FleetDashboard() {
                                         const isError = ['error', 'unclassified', 'no_result'].includes(fs.status);
                                         const isClassified = fs.status === 'classified';
                                         return (
-                                            <div key={f.name} className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${isDone ? 'bg-emerald-50 border-emerald-200' :
+                                            <div key={f.name} className={`flex items-center gap-3 p-3 rounded-md border transition-all duration-300 ${isDone ? 'bg-emerald-50 border-emerald-200' :
                                                 isError ? 'bg-rose-50 border-rose-200' :
-                                                    'bg-slate-50 border-slate-200'
+                                                    'bg-gray-50 border-gray-200'
                                                 }`}>
                                                 {/* Status icon */}
                                                 <div className="flex-shrink-0">
@@ -964,11 +970,11 @@ export default function FleetDashboard() {
                                                 </div>
                                                 {/* File info */}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-bold text-slate-700 truncate" title={f.name}>{f.name}</p>
+                                                    <p className="text-sm font-medium text-gray-700 truncate" title={f.name}>{f.name}</p>
                                                     <p className={`text-[11px] font-semibold mt-0.5 ${isDone ? 'text-emerald-600' :
                                                         isError ? 'text-rose-600' :
                                                             isClassified ? 'text-blue-600' :
-                                                                'text-slate-400'
+                                                                'text-gray-400'
                                                         }`}>
                                                         {isDone ? `✓ ${formatTitle(fs.docType) || 'Completado'}` :
                                                             isError ? `Error: ${fs.errorMsg || 'Error al procesar'}` :
@@ -983,14 +989,14 @@ export default function FleetDashboard() {
                             </div>
                         ) : (
                             <form onSubmit={handleGlobalUpload} className="w-full flex flex-col">
-                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                    <h3 className="text-sm font-black text-slate-800 tracking-wide flex items-center gap-2">
+                                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                    <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full bg-blue-600"></div> Subir Documentos
                                     </h3>
                                     <button
                                         type="button"
                                         onClick={resetUploadModal}
-                                        className="text-slate-400 hover:text-slate-600 p-1 text-2xl leading-none transition-colors"
+                                        className="text-gray-400 hover:text-gray-600 p-1 text-2xl leading-none transition-colors"
                                     >
                                         &times;
                                     </button>
@@ -1005,7 +1011,7 @@ export default function FleetDashboard() {
                                     )}
 
                                     <div className="relative">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ID del Vehículo</label>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">ID del Vehículo</label>
                                         <input
                                             type="text"
                                             value={uploadVehicleId}
@@ -1013,19 +1019,19 @@ export default function FleetDashboard() {
                                             onFocus={() => setIsIdDropdownOpen(true)}
                                             onBlur={() => setTimeout(() => setIsIdDropdownOpen(false), 200)}
                                             placeholder="Escribe o selecciona ID..."
-                                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 font-medium text-slate-700 disabled:opacity-50"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 font-medium text-gray-700 disabled:opacity-50"
                                             required
                                             disabled={uploadPhase !== 'idle' && uploadPhase !== 'error'}
                                             autoComplete="off"
                                         />
                                         {isIdDropdownOpen && (uploadPhase === 'idle' || uploadPhase === 'error') && allVehicleIds.filter(id => id.toLowerCase().includes(uploadVehicleId.toLowerCase())).length > 0 && (
-                                            <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-[156px] overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-[156px] overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-1 duration-200">
                                                 {allVehicleIds
                                                     .filter(id => id.toLowerCase().includes(uploadVehicleId.toLowerCase()))
                                                     .map(id => (
                                                         <div
                                                             key={id}
-                                                            className="px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer font-medium border-b border-slate-50 last:border-0 transition-colors"
+                                                            className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer font-medium border-b border-gray-50 last:border-0 transition-colors"
                                                             onClick={() => { setUploadVehicleId(id); setIsIdDropdownOpen(false); }}
                                                         >
                                                             {id}
@@ -1033,11 +1039,11 @@ export default function FleetDashboard() {
                                                     ))}
                                             </div>
                                         )}
-                                        <p className="text-[10px] text-slate-400 mt-1.5 ml-1">Puedes escribir uno nuevo si no existe.</p>
+                                        <p className="text-[10px] text-gray-400 mt-1.5 ml-1">Puedes escribir uno nuevo si no existe.</p>
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Archivos</label>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Archivos</label>
 
                                         {/* Hidden file input */}
                                         <input
@@ -1082,36 +1088,36 @@ export default function FleetDashboard() {
                                                         ? 'border-blue-500 bg-blue-50 scale-[1.01]'
                                                         : uploadFiles.length > 0
                                                             ? 'border-blue-300 bg-blue-50/40'
-                                                            : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/50'
+                                                            : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/50'
                                                     }
                                                     ${(uploadPhase !== 'idle' && uploadPhase !== 'error') ? 'opacity-50 cursor-not-allowed' : ''}
                                                 `}
                                             >
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${isDragging ? 'bg-blue-600 scale-110' : 'bg-slate-200'}`}>
-                                                    <svg className={`w-6 h-6 transition-colors duration-200 ${isDragging ? 'text-white' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${isDragging ? 'bg-blue-600 scale-110' : 'bg-gray-200'}`}>
+                                                    <svg className={`w-6 h-6 transition-colors duration-200 ${isDragging ? 'text-white' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                                     </svg>
                                                 </div>
-                                                <p className="text-sm font-bold text-slate-600 text-center leading-snug">
+                                                <p className="text-sm font-bold text-gray-600 text-center leading-snug">
                                                     {isDragging ? 'Suelta aquí' : 'Arrastra o haz clic'}
                                                 </p>
-                                                <p className="text-[11px] text-slate-400 font-medium text-center">PDF · PNG · JPG</p>
+                                                <p className="text-[11px] text-gray-400 font-medium text-center">PDF · PNG · JPG</p>
                                             </div>
 
                                             {/* Divider */}
-                                            <div className="w-px bg-slate-200 self-stretch" />
+                                            <div className="w-px bg-gray-200 self-stretch" />
 
                                             {/* RIGHT: File list */}
                                             <div className="flex-1 flex flex-col overflow-hidden">
                                                 {uploadFiles.length === 0 ? (
-                                                    <div className="flex-1 flex flex-col items-center justify-center text-center gap-2 text-slate-300">
+                                                    <div className="flex-1 flex flex-col items-center justify-center text-center gap-2 text-gray-300">
                                                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                                         <p className="text-xs font-semibold">Sin archivos aún</p>
                                                     </div>
                                                 ) : (
                                                     <>
                                                         <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                                                            <span className="text-xs font-bold text-slate-500">{uploadFiles.length} archivo{uploadFiles.length > 1 ? 's' : ''}</span>
+                                                            <span className="text-xs font-bold text-gray-500">{uploadFiles.length} archivo{uploadFiles.length > 1 ? 's' : ''}</span>
                                                             <button type="button" onClick={() => setUploadFiles([])} className="text-[10px] font-bold text-rose-400 hover:text-rose-600 transition-colors">
                                                                 Quitar todos
                                                             </button>
@@ -1121,15 +1127,15 @@ export default function FleetDashboard() {
                                                                 const ext = f.name.split('.').pop().toLowerCase();
                                                                 const isPdf = ext === 'pdf';
                                                                 return (
-                                                                    <div key={f.name} className="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm group transition-all duration-150 hover:border-rose-200 hover:bg-rose-50/30 flex-shrink-0">
+                                                                    <div key={f.name} className="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm group transition-all duration-150 hover:border-rose-200 hover:bg-rose-50/30 flex-shrink-0">
                                                                         <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${isPdf ? 'bg-rose-100' : 'bg-sky-100'}`}>
-                                                                            <span className={`text-[9px] font-black uppercase ${isPdf ? 'text-rose-600' : 'text-sky-600'}`}>{ext}</span>
+                                                                            <span className={`text-[9px] font-semibold uppercase ${isPdf ? 'text-rose-600' : 'text-sky-600'}`}>{ext}</span>
                                                                         </div>
-                                                                        <span className="text-xs font-semibold text-slate-700 truncate flex-1" title={f.name}>{f.name}</span>
+                                                                        <span className="text-xs font-semibold text-gray-700 truncate flex-1" title={f.name}>{f.name}</span>
                                                                         <button
                                                                             type="button"
                                                                             onClick={(e) => { e.stopPropagation(); setUploadFiles(prev => prev.filter((_, i) => i !== idx)); }}
-                                                                            className="w-4 h-4 text-slate-300 hover:text-rose-500 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                                                                            className="w-4 h-4 text-gray-300 hover:text-rose-500 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
                                                                         >
                                                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                                                                         </button>
@@ -1143,12 +1149,12 @@ export default function FleetDashboard() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                                     <button
                                         type="button"
                                         onClick={resetUploadModal}
                                         disabled={uploadPhase !== 'idle' && uploadPhase !== 'error'}
-                                        className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
+                                        className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
                                     >
                                         CANCELAR
                                     </button>

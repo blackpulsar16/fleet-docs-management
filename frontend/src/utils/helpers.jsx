@@ -81,7 +81,7 @@ export const renderDocIcon = (docType, isValid, docStatus) => {
   const typeStr = String(docType).toLowerCase();
   let colorClass;
   if (!isValid) {
-    colorClass = "text-slate-300";         // faltante
+    colorClass = "text-gray-300";         // faltante
   } else if (docStatus === 'critical') {
     colorClass = "text-rose-500";          // vencido
   } else if (docStatus === 'warning') {

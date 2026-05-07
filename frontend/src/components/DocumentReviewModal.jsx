@@ -33,7 +33,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
     const extractionNotes = doc.data?.extraction_notes;
 
     const getConfidenceColor = (score) => {
-        if (score === undefined || score === null) return 'bg-slate-100 text-slate-600 border-slate-200';
+        if (score === undefined || score === null) return 'bg-gray-100 text-gray-600 border-gray-200';
         if (score >= 90) return 'bg-emerald-100 text-emerald-800 border-emerald-200';
         if (score >= 70) return 'bg-amber-100 text-amber-800 border-amber-200';
         return 'bg-rose-100 text-rose-800 border-rose-200';
@@ -96,13 +96,13 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
         if (key === 'confidence_score' || key === 'extraction_notes') return null;
 
         return (
-            <div key={path} className="flex flex-col w-full border-b border-slate-100/60 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5" title={formatTitle(key)}>
+            <div key={path} className="flex flex-col w-full border-b border-gray-100/60 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5" title={formatTitle(key)}>
                     {formatTitle(key)}
                 </label>
                 <input
                     type={typeof value === 'number' ? 'number' : 'text'}
-                    className={`w-full text-[13px] font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-md px-3 py-2 transition-all ${isEditor ? 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white' : 'opacity-80 cursor-not-allowed'}`}
+                    className={`w-full text-[13px] font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 transition-all ${isEditor ? 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white' : 'opacity-80 cursor-not-allowed'}`}
                     value={formData[path.split('.')[0]]?.[path.split('.')[1]] ?? formData[path] ?? ''}
                     onChange={(e) => handleInputChange(path, e.target.value)}
                     disabled={!isEditor}
@@ -112,8 +112,8 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex flex-col md:flex-row p-4 md:p-6 gap-6 animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-4 duration-300 ease-out">
-            <div className="flex-1 bg-slate-950 rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden relative flex flex-col">
+        <div className="fixed inset-0 z-[100] bg-gray-900/95 backdrop-blur-md flex flex-col md:flex-row p-4 md:p-6 gap-6 animate-in fade-in zoom-in-[0.98] slide-in-from-bottom-4 duration-300 ease-out">
+            <div className="flex-1 bg-gray-950 rounded-2xl border border-gray-700/50 shadow-2xl overflow-hidden relative flex flex-col">
                 <div className="px-5 py-3 border-b border-gray-200 flex justify-between items-center bg-white shrink-0 z-20 shadow-sm">
                     <div className="flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
@@ -137,19 +137,19 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
 
                     {/* IMAGE CONTROLS */}
                     {doc.file_url?.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) && (
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-slate-700/80 shadow-[0_8px_30px_rgb(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0">
-                            <button onClick={() => setViewerScale(s => Math.max(0.5, s - 0.25))} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Alejar">
+                        <div className="absolute bottom-6 left-1/2 -trangray-x-1/2 z-30 flex items-center gap-1.5 bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-gray-700/80 shadow-[0_8px_30px_rgb(0,0,0,0.5)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 trangray-y-4 group-hover:trangray-y-0">
+                            <button onClick={() => setViewerScale(s => Math.max(0.5, s - 0.25))} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-xl transition-all active:scale-95" title="Alejar">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
                             </button>
-                            <span className="text-[11px] font-mono font-bold text-slate-300 w-12 text-center select-none">{Math.round(viewerScale * 100)}%</span>
-                            <button onClick={() => setViewerScale(s => Math.min(4, s + 0.25))} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Acercar">
+                            <span className="text-[11px] font-mono font-bold text-gray-300 w-12 text-center select-none">{Math.round(viewerScale * 100)}%</span>
+                            <button onClick={() => setViewerScale(s => Math.min(4, s + 0.25))} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-xl transition-all active:scale-95" title="Acercar">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                             </button>
-                            <div className="w-px h-6 bg-slate-700 mx-1"></div>
-                            <button onClick={() => setViewerRotation(r => r - 90)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Rotar izquierda">
+                            <div className="w-px h-6 bg-gray-700 mx-1"></div>
+                            <button onClick={() => setViewerRotation(r => r - 90)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-xl transition-all active:scale-95" title="Rotar izquierda">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                             </button>
-                            <button onClick={() => setViewerRotation(r => r + 90)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-all active:scale-95" title="Rotar derecha">
+                            <button onClick={() => setViewerRotation(r => r + 90)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-xl transition-all active:scale-95" title="Rotar derecha">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
                             </button>
                         </div>
@@ -177,27 +177,27 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                 </div>
             </div>
 
-            <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 bg-slate-50 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-slate-200/60">
-                <div className="px-6 py-5 border-b border-slate-200 flex flex-col bg-white z-10 shadow-sm">
+            <div className="w-full md:w-[450px] lg:w-[500px] shrink-0 bg-gray-50 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-200/60">
+                <div className="px-6 py-5 border-b border-gray-200 flex flex-col bg-white z-10 shadow-sm">
                     <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-black text-slate-800 tracking-tight truncate pr-4" title={formatTitle(doc.doc_type)}>
+                        <h3 className="text-lg font-semibold text-gray-800 tracking-tight truncate pr-4" title={formatTitle(doc.doc_type)}>
                             {doc.status === 'verified' ? '✅' : '👀'} Revisión
                         </h3>
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 transition-colors shrink-0"
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-rose-100 text-gray-500 hover:text-rose-600 transition-colors shrink-0"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div 
                                 className="h-full bg-blue-600 transition-all duration-500" 
                                 style={{ width: `${((currentIndex + 1) / docs.length) * 100}%` }}
                             ></div>
                         </div>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest whitespace-nowrap">
                             Documento {currentIndex + 1} de {docs.length}
                         </span>
                     </div>
@@ -209,10 +209,10 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                     {confidenceScore !== undefined && (
                         <div className={`mb-4 flex items-center justify-between p-3 rounded-lg border ${getConfidenceColor(confidenceScore)}`}>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Precisión de IA</span>
+                                <span className="text-[10px] font-medium uppercase tracking-widest opacity-80">Precisión de IA</span>
                                 <span className="text-sm font-bold">Confianza de Extracción</span>
                             </div>
-                            <span className="text-xl font-black">{confidenceScore}%</span>
+                            <span className="text-xl font-semibold">{confidenceScore}%</span>
                         </div>
                     )}
 
@@ -221,26 +221,26 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                         <div className="mb-6 flex items-start gap-4 p-4 rounded-xl bg-amber-100 border-2 border-amber-300 text-amber-900 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
                             <span className="text-2xl mt-0.5">💡</span>
                             <div className="flex flex-col gap-1.5">
-                                <span className="text-[11px] font-black uppercase tracking-widest text-amber-700">Comentario de la IA</span>
+                                <span className="text-[11px] font-medium uppercase tracking-widest text-amber-700">Comentario de la IA</span>
                                 <span className="text-[13px] font-bold leading-relaxed">{extractionNotes}</span>
                             </div>
                         </div>
                     )}
 
-                    <h4 className="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+                    <h4 className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-4 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> {isEditor ? 'Datos extraídos (Editar si es necesario)' : 'Datos extraídos (Solo Lectura)'}
                     </h4>
 
-                    <div className="flex flex-col gap-y-1 mb-6 bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm">
+                    <div className="flex flex-col gap-y-1 mb-6 bg-white p-5 rounded-xl border border-gray-200/60 shadow-sm">
                         {Object.entries(doc.data || {}).filter(([_, val]) => typeof val !== 'object' || val === null).map(([key, value]) => (
                             renderInput(key, value, key)
                         ))}
                     </div>
 
                     {Object.entries(doc.data || {}).filter(([_, val]) => typeof val === 'object' && val !== null).map(([key, value]) => (
-                        <div key={key} className="flex flex-col w-full mb-6 bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 border-b border-slate-100 pb-2 flex items-center gap-2" title={formatTitle(key)}>
-                                <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div> {formatTitle(key)}
+                        <div key={key} className="flex flex-col w-full mb-6 bg-white p-5 rounded-xl border border-gray-200/60 shadow-sm">
+                            <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2 flex items-center gap-2" title={formatTitle(key)}>
+                                <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div> {formatTitle(key)}
                             </span>
                             <div className="w-full flex flex-col gap-y-1">
                                 {Object.entries(value).map(([childKey, childValue]) => (
@@ -251,12 +251,12 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                     ))}
                 </div>
 
-                <div className="p-5 border-t border-slate-200 bg-white flex justify-between items-center">
+                <div className="p-5 border-t border-gray-200 bg-white flex justify-between items-center">
                     <div className="flex gap-2">
                         {currentIndex > 0 && (
                             <button 
                                 onClick={handlePrev}
-                                className="px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200"
+                                className="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-100 transition-colors border border-gray-200"
                             >
                                 Anterior
                             </button>
@@ -266,7 +266,7 @@ export default function DocumentReviewModal({ docs = [], initialIndex = 0, onClo
                     <div className="flex gap-3">
                         <button 
                             onClick={handleNext}
-                            className="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                            className="px-4 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                             Omitir
                         </button>

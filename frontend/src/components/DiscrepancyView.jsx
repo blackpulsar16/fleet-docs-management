@@ -29,33 +29,33 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
     });
 
     return (
-        <div className="fixed inset-0 z-[300] bg-slate-900/95 backdrop-blur-md flex flex-col md:flex-row p-3 gap-2 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[300] bg-gray-900/95 backdrop-blur-md flex flex-col md:flex-row p-3 gap-2 animate-in fade-in duration-200">
             {/* File pane */}
-            <div className="flex-1 bg-slate-950 rounded-2xl border border-slate-700/50 flex flex-col overflow-hidden">
-                <div className="px-5 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900 shrink-0">
+            <div className="flex-1 bg-gray-950 rounded-2xl border border-gray-700/50 flex flex-col overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-800 flex items-center justify-between bg-gray-900 shrink-0">
                     <div className="flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                        <span className="text-slate-200 font-bold text-sm">{formatTitle(docType)}</span>
-                        <span className="text-slate-500 text-xs">·</span>
-                        <span className="text-slate-400 text-xs font-mono">{vehicleId}</span>
+                        <span className="text-gray-200 font-bold text-sm">{formatTitle(docType)}</span>
+                        <span className="text-gray-500 text-xs">·</span>
+                        <span className="text-gray-400 text-xs font-mono">{vehicleId}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         {doc?.file_url && (
                             <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                                className="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors flex items-center gap-1.5">
+                                className="text-xs font-bold text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-700 transition-colors flex items-center gap-1.5">
                                 Abrir externo
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                             </a>
                         )}
-                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-rose-500 hover:text-white transition-colors">
+                        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-gray-300 hover:bg-rose-500 hover:text-white transition-colors">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
                 </div>
                 <div className="flex-1 relative overflow-hidden flex items-center justify-center bg-[#1a1a22]">
-                    {isLoading && <svg className="animate-spin w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>}
+                    {isLoading && <svg className="animate-spin w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>}
                     {isError && <span className="text-rose-400 text-sm">Error al cargar el documento.</span>}
-                    {!isLoading && !isError && !doc && <span className="text-slate-500 text-sm">Documento no encontrado.</span>}
+                    {!isLoading && !isError && !doc && <span className="text-gray-500 text-sm">Documento no encontrado.</span>}
                     {!isLoading && doc?.file_url && (
                         doc.file_url.match(/\.(jpeg|jpg|png|gif|webp)(\?|$)/i)
                             ? <div className="w-full h-full overflow-auto flex items-center justify-center p-4">
@@ -70,28 +70,28 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
 
             {/* Meta pane */}
             {!isLoading && doc && (
-                <div className="w-full md:w-[380px] shrink-0 bg-white rounded-2xl border border-slate-200 flex flex-col overflow-hidden shadow-2xl">
-                    <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Datos OCR</p>
-                        <p className="text-base font-black text-slate-800 mt-0.5">{formatTitle(docType)}</p>
+                <div className="w-full md:w-[380px] shrink-0 bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden shadow-2xl">
+                    <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
+                        <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Datos OCR</p>
+                        <p className="text-base font-semibold text-gray-800 mt-0.5">{formatTitle(docType)}</p>
                     </div>
                     <div className="flex-1 overflow-y-auto p-5 custom-scrollbar flex flex-col gap-3">
                         {Object.entries(doc.data || {}).map(([k, v]) => {
                             const isObj = v !== null && typeof v === 'object' && !Array.isArray(v);
                             return (
-                                <div key={k} className="flex flex-col border-b border-slate-100 pb-3 last:border-0">
-                                    <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1">{formatTitle(k)}</span>
+                                <div key={k} className="flex flex-col border-b border-gray-100 pb-3 last:border-0">
+                                    <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1">{formatTitle(k)}</span>
                                     {isObj ? (
-                                        <div className="flex flex-col gap-1.5 pl-2 border-l-2 border-slate-100 mt-1">
+                                        <div className="flex flex-col gap-1.5 pl-2 border-l-2 border-gray-100 mt-1">
                                             {Object.entries(v).map(([sk, sv]) => (
                                                 <div key={sk} className="flex flex-col">
-                                                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{formatTitle(sk)}</span>
-                                                    <span className="text-sm font-bold text-slate-700 leading-snug break-all">{String(sv ?? 'N/A')}</span>
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">{formatTitle(sk)}</span>
+                                                    <span className="text-sm font-bold text-gray-700 leading-snug break-all">{String(sv ?? 'N/A')}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <span className="text-sm font-bold text-slate-700 leading-snug break-all">{String(v ?? 'N/A')}</span>
+                                        <span className="text-sm font-bold text-gray-700 leading-snug break-all">{String(v ?? 'N/A')}</span>
                                     )}
                                 </div>
                             );
@@ -107,12 +107,12 @@ function DocViewer({ vehicleId, docType, onClose, fetchWithAuth }) {
 function SourceChip({ label, value, isGround }) {
     return (
         <div className={`flex flex-col min-w-0 px-2.5 py-1.5 rounded border ${
-            isGround ? 'bg-slate-100 border-slate-300' : 'bg-white border-slate-200'
+            isGround ? 'bg-gray-100 border-gray-300' : 'bg-white border-gray-200'
         }`}>
-            <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 leading-none mb-1 truncate">
-                {label}{isGround && <span className="ml-1 text-slate-500">★</span>}
+            <span className="text-[8px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-1 truncate">
+                {label}{isGround && <span className="ml-1 text-gray-500">★</span>}
             </span>
-            <span className="text-[11px] font-bold text-slate-800 font-mono break-all leading-snug">
+            <span className="text-[11px] font-bold text-gray-800 font-mono break-all leading-snug">
                 {value}
             </span>
         </div>
@@ -166,7 +166,7 @@ function CharDiff({ value, reference }) {
         <span className="font-mono text-[11px] font-bold break-all leading-snug">
             {segments.map((seg, idx) => {
                 if (seg.type === 'match') {
-                    return <span key={idx} className="text-slate-700">{seg.char}</span>;
+                    return <span key={idx} className="text-gray-700">{seg.char}</span>;
                 }
                 if (seg.type === 'extra') {
                     return <span key={idx} className="text-rose-600 bg-rose-100 rounded-[2px] px-[1px]">{seg.char}</span>;
@@ -176,7 +176,7 @@ function CharDiff({ value, reference }) {
             {netMissing > 0 && (
                 <span
                     title={`Faltan: ${missingSegs.map(s => s.char).join('')}`}
-                    className="ml-1 text-[9px] font-black text-rose-600 bg-rose-50 border border-rose-200 rounded px-1 py-px cursor-default"
+                    className="ml-1 text-[9px] font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded px-1 py-px cursor-default"
                 >
                     −{netMissing}
                 </span>
@@ -199,11 +199,11 @@ function DiscrepancyDetail({ discrepancies, matching = [] }) {
         const norm        = v => String(v ?? '').toUpperCase().replace(/\s+/g, '');
 
         return (
-            <div key={d.field} className={`flex items-start gap-4 px-5 py-3 ${isMismatch ? 'bg-white' : 'bg-slate-50/50'}`}>
+            <div key={d.field} className={`flex items-start gap-4 px-5 py-3 ${isMismatch ? 'bg-white' : 'bg-gray-50/50'}`}>
                 {/* Field label */}
                 <div className="w-36 shrink-0 pt-0.5 flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-0.5 ${isMismatch ? 'bg-rose-400' : 'bg-emerald-400'}`} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{d.label}</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">{d.label}</span>
                 </div>
 
                 {/* Sources */}
@@ -211,13 +211,13 @@ function DiscrepancyDetail({ discrepancies, matching = [] }) {
                     {entries.map(([srcLabel, value]) => {
                         const hasDiff = isMismatch && norm(value) !== norm(groundVal);
                         return (
-                            <div key={srcLabel} className="flex flex-col min-w-0 px-2.5 py-1.5 rounded border bg-white border-slate-200">
-                                <span className="text-[8px] font-bold uppercase tracking-widest leading-none mb-1 text-slate-400">
-                                    {srcLabel}{srcLabel === groundLabel && <span className="ml-1 text-slate-400">★</span>}
+                            <div key={srcLabel} className="flex flex-col min-w-0 px-2.5 py-1.5 rounded border bg-white border-gray-200">
+                                <span className="text-[8px] font-bold uppercase tracking-widest leading-none mb-1 text-gray-400">
+                                    {srcLabel}{srcLabel === groundLabel && <span className="ml-1 text-gray-400">★</span>}
                                 </span>
                                 {hasDiff
                                     ? <CharDiff value={value} reference={groundVal} />
-                                    : <span className="font-mono text-[11px] font-bold text-slate-700 break-all leading-snug">{value}</span>
+                                    : <span className="font-mono text-[11px] font-bold text-gray-700 break-all leading-snug">{value}</span>
                                 }
                             </div>
                         );
@@ -227,8 +227,8 @@ function DiscrepancyDetail({ discrepancies, matching = [] }) {
                 {/* Badge */}
                 <div className="shrink-0 pt-0.5">
                     {isMismatch
-                        ? <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border bg-rose-50 border-rose-200 text-rose-700 whitespace-nowrap">✕ Diferencia</span>
-                        : <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border bg-emerald-50 border-emerald-200 text-emerald-700 whitespace-nowrap">✓ Coincide</span>
+                        ? <span className="text-[9px] font-medium uppercase tracking-widest px-2 py-0.5 rounded border bg-rose-50 border-rose-200 text-rose-700 whitespace-nowrap">✕ Diferencia</span>
+                        : <span className="text-[9px] font-medium uppercase tracking-widest px-2 py-0.5 rounded border bg-emerald-50 border-emerald-200 text-emerald-700 whitespace-nowrap">✓ Coincide</span>
                     }
                 </div>
             </div>
@@ -236,12 +236,12 @@ function DiscrepancyDetail({ discrepancies, matching = [] }) {
     };
 
     return (
-        <div className="flex flex-col divide-y divide-slate-100">
+        <div className="flex flex-col divide-y divide-gray-100">
             {discrepancies.map(d => renderRow(d, true))}
             {matching.length > 0 && (
                 <>
-                    <div className="px-5 py-1.5 bg-slate-100/60">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Campos que coinciden ({matching.length})</span>
+                    <div className="px-5 py-1.5 bg-gray-100/60">
+                        <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400">Campos que coinciden ({matching.length})</span>
                     </div>
                     {matching.map(d => renderRow(d, false))}
                 </>
@@ -309,7 +309,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                 <div className="flex items-center gap-2">
                     {/* Search */}
                     <div className="relative">
-                        <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="absolute left-2 top-1/2 -trangray-y-1/2 w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
                         </svg>
                         <input
@@ -344,7 +344,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
             {/* ── Body ── */}
             {isLoading ? (
                 <div className="flex-1 flex items-center justify-center">
-                    <svg className="animate-spin w-7 h-7 text-slate-500" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin w-7 h-7 text-gray-500" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
@@ -354,7 +354,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                     Error al cargar discrepancias.
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-400 opacity-60">
+                <div className="flex-1 flex flex-col items-center justify-center gap-3 text-gray-400 opacity-60">
                     <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -362,7 +362,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                         {search ? 'Sin resultados para esa búsqueda' : 'Sin discrepancias detectadas'}
                     </span>
                     {!search && (
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-gray-500">
                             Todos los campos coinciden entre documentos
                         </span>
                     )}
@@ -388,7 +388,7 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                     </div>
 
                     {/* Rows */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100 bg-white">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-gray-100 bg-white">
                         {filtered.map((v) => {
                             const isExpanded = expandedId === v.vehicle_id;
                             const un = unMap[v.vehicle_id] ?? '—';
@@ -402,30 +402,30 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                                         onClick={() => setExpandedId(isExpanded ? null : v.vehicle_id)}
                                         className={`w-full grid text-left transition-all duration-150 group ${
                                             isExpanded
-                                                ? 'bg-slate-50 shadow-[inset_3px_0_0_0_rgba(239,68,68,0.8)]'
-                                                : 'hover:bg-slate-50/70'
+                                                ? 'bg-gray-50 shadow-[inset_3px_0_0_0_rgba(239,68,68,0.8)]'
+                                                : 'hover:bg-gray-50/70'
                                         }`}
                                         style={{ gridTemplateColumns: '10rem 1fr 10rem 6rem' }}
                                     >
                                         {/* Vehicle ID */}
                                         <div className="px-5 py-3 flex items-center gap-2">
-                                            <svg className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 text-slate-400 ${isExpanded ? 'rotate-90' : ''}`}
+                                            <svg className={`w-3.5 h-3.5 transition-transform duration-150 shrink-0 text-gray-400 ${isExpanded ? 'rotate-90' : ''}`}
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                                             </svg>
-                                            <span className="font-black text-slate-800 text-sm">{v.vehicle_id}</span>
+                                            <span className="font-semibold text-gray-800 text-sm">{v.vehicle_id}</span>
                                         </div>
 
                                         {/* Field tags — mismatches + matching */}
                                         <div className="px-4 py-3 flex flex-wrap gap-1.5 items-center">
                                             {fieldLabels.map(lbl => (
                                                 <span key={lbl}
-                                                    className="text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded border border-rose-200 bg-rose-50 text-rose-700 whitespace-nowrap">
+                                                    className="text-[9px] font-medium uppercase tracking-wide px-2 py-0.5 rounded border border-rose-200 bg-rose-50 text-rose-700 whitespace-nowrap">
                                                     ✕ {lbl}
                                                 </span>
                                             ))}
                                             {matchingLabels.length > 0 && (
-                                                <span className="w-px h-3 bg-slate-200 mx-0.5" />
+                                                <span className="w-px h-3 bg-gray-200 mx-0.5" />
                                             )}
                                             {matchingLabels.map(lbl => (
                                                 <span key={lbl}
@@ -437,14 +437,14 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
 
                                         {/* UN */}
                                         <div className="px-4 py-3 flex items-center">
-                                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                                            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
                                                 {un}
                                             </span>
                                         </div>
 
                                         {/* Count */}
                                         <div className="px-4 py-3 text-right flex flex-col items-end justify-center gap-0.5">
-                                            <span className="text-sm font-black text-rose-600 tabular-nums leading-none">{v.count}</span>
+                                            <span className="text-sm font-semibold text-rose-600 tabular-nums leading-none">{v.count}</span>
                                             {matchingLabels.length > 0 && (
                                                 <span className="text-[10px] font-bold text-emerald-600 tabular-nums leading-none">{matchingLabels.length} ✓</span>
                                             )}
@@ -463,25 +463,25 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                                             .filter(x => x.docType);
 
                                         return (
-                                            <div className="bg-slate-50/60 border-b border-slate-200 border-l-4 border-l-rose-400 animate-in slide-in-from-top-1 fade-in duration-150">
+                                            <div className="bg-gray-50/60 border-b border-gray-200 border-l-4 border-l-rose-400 animate-in slide-in-from-top-1 fade-in duration-150">
                                                 {/* Sub-header */}
-                                                <div className="px-4 py-2 border-b border-slate-200 bg-slate-100/60 flex items-center justify-between">
+                                                <div className="px-4 py-2 border-b border-gray-200 bg-gray-100/60 flex items-center justify-between">
                                                     <div>
-                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                                                        <span className="text-[9px] font-medium uppercase tracking-widest text-gray-500">
                                                             Detalle · {v.vehicle_id} · {v.count} campo{v.count !== 1 ? 's' : ''} con diferencia
                                                         </span>
-                                                        <span className="ml-3 text-[9px] text-slate-400">★ = fuente de referencia (Carta Factura tiene prioridad)</span>
+                                                        <span className="ml-3 text-[9px] text-gray-400">★ = fuente de referencia (Carta Factura tiene prioridad)</span>
                                                     </div>
                                                     {/* Document view buttons */}
                                                     <div className="flex items-center gap-1.5 shrink-0 ml-4">
-                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mr-1">Ver doc:</span>
+                                                        <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400 mr-1">Ver doc:</span>
                                                         {involvedDocs.map(({ label, docType }) => (
                                                             <button
                                                                 key={docType}
                                                                 onClick={() => setViewing({ vehicleId: v.vehicle_id, docType })}
-                                                                className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 text-[10px] font-bold text-slate-600 transition-all active:scale-95 shadow-sm"
+                                                                className="flex items-center gap-1 px-2.5 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-400 text-[10px] font-bold text-gray-600 transition-all active:scale-95 shadow-sm"
                                                             >
-                                                                <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                                 </svg>
@@ -500,12 +500,12 @@ export default function DiscrepancyView({ onClose, vehicles: fleetVehicles = [] 
                     </div>
 
                     {/* Footer */}
-                    <div className="flex-shrink-0 px-5 py-2 border-t border-slate-100 bg-white flex items-center gap-4">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                    <div className="flex-shrink-0 px-5 py-2 border-t border-gray-100 bg-white flex items-center gap-4">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                             {filtered.length} vehículo{filtered.length !== 1 ? 's' : ''} · {totalDiscrepancies} diferencia{totalDiscrepancies !== 1 ? 's' : ''} total
                         </span>
-                        <span className="text-[10px] text-slate-300">·</span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-gray-300">·</span>
+                        <span className="text-[10px] text-gray-400">
                             Solo OCR entre documentos · Comparación SOL disponible en pestaña Validación por vehículo
                         </span>
                     </div>

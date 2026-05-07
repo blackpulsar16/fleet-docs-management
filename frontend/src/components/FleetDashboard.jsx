@@ -11,6 +11,14 @@ import { formatTitle, extractDocName, parseExpirationString, renderDocIcon } fro
 import { FLEET_API, SOL_API, AI_API } from '../config/api.js';
 import { useApiClient } from '../hooks/useApiClient.js';
 
+const DOC_LABELS = {
+    dictamen_gas:              'Dictamen de Gas',
+    tarjeta_circulacion_front: 'Tarjeta Circulación',
+    poliza_seguro:             'Póliza de Seguro',
+    certificacion_blindaje:    'Cert. Blindaje',
+    bill_make:                 'Carta Factura',
+};
+
 export default function FleetDashboard() {
     const queryClientInstance = useQueryClient();
     const auth = useAuth();
@@ -595,19 +603,41 @@ export default function FleetDashboard() {
 
                 {/* ── KPI STRIP — hidden in discrepancy view ── */}
                 {!isDiscrepancyView && (
-                <header className="flex-shrink-0 flex items-center gap-1 px-5 py-3 bg-white border-b border-slate-100 z-10 relative">
+                <header className="flex-shrink-0 flex items-center gap-1 px-5 py-2.5 bg-white border-b border-gray-200 z-10 relative">
                     {docTypeFilter !== 'all' ? (
-                        [
-                            { label: 'Total',      value: activeStats.total,    num: 'text-slate-500'    },
-                            { label: 'Vigentes',   value: activeStats.ok,       num: 'text-emerald-600'  },
-                            { label: 'Por Vencer', value: activeStats.warning,  num: 'text-amber-500'    },
-                            { label: 'Crítico',    value: activeStats.critical, num: 'text-rose-500'     },
-                        ].map(kpi => (
-                            <div key={kpi.label} className="flex flex-col items-start px-4 py-2 min-w-[72px]">
-                                <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num}`}>{kpi.value ?? '…'}</span>
-                                <span className="text-[9px] font-bold uppercase tracking-widest mt-0.5 text-slate-400">{kpi.label}</span>
+                        <>
+                            {/* Doc-filter KPIs */}
+                            {[
+                                { label: 'Total',      value: activeStats.total,    num: 'text-slate-500'    },
+                                { label: 'Vigentes',   value: activeStats.ok,       num: 'text-emerald-600'  },
+                                { label: 'Por Vencer', value: activeStats.warning,  num: 'text-amber-500'    },
+                                { label: 'Crítico',    value: activeStats.critical, num: 'text-rose-500'     },
+                            ].map(kpi => (
+                                <div key={kpi.label} className="flex flex-col items-start px-4 py-1.5 min-w-[68px]">
+                                    <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num}`}>{kpi.value ?? '…'}</span>
+                                    <span className="text-[9px] font-medium uppercase tracking-widest mt-0.5 text-gray-400">{kpi.label}</span>
+                                </div>
+                            ))}
+
+                            {/* Right side: breadcrumb + exit */}
+                            <div className="ml-auto flex items-center gap-3">
+                                {/* Breadcrumb */}
+                                <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                                    <span>Panel</span>
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    <span className="font-medium text-gray-600">{DOC_LABELS[docTypeFilter] || docTypeFilter}</span>
+                                </div>
+                                <div className="w-px h-5 bg-gray-200" />
+                                {/* Exit button */}
+                                <button
+                                    onClick={() => { setDocTypeFilter('all'); setDocStateFilter('all'); }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 text-xs font-medium hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                    Volver al panel
+                                </button>
                             </div>
-                        ))
+                        </>
                     ) : (
                         [
                             { key: 'all',      label: 'Total',    value: stats.total,    num: 'text-slate-500',   activeBg: 'bg-slate-100'  },
@@ -620,23 +650,19 @@ export default function FleetDashboard() {
                                 <button
                                     key={kpi.key}
                                     onClick={() => setStatusFilter(kpi.key)}
-                                    className={`flex flex-col items-start px-4 py-2 rounded-lg transition-all duration-150 min-w-[72px] ${
-                                        active ? kpi.activeBg : 'hover:bg-slate-50'
+                                    className={`flex flex-col items-start px-4 py-1.5 rounded-lg transition-all duration-150 min-w-[68px] ${
+                                        active ? kpi.activeBg : 'hover:bg-gray-50'
                                     }`}
                                 >
                                     <span className={`text-2xl font-black tabular-nums leading-none ${kpi.num} ${active ? '' : 'opacity-40'}`}>{kpi.value}</span>
-                                    <span className={`text-[9px] font-bold uppercase tracking-widest mt-0.5 ${active ? 'text-slate-500' : 'text-slate-400 opacity-50'}`}>{kpi.label}</span>
+                                    <span className={`text-[9px] font-medium uppercase tracking-widest mt-0.5 ${active ? 'text-slate-500' : 'text-gray-400 opacity-50'}`}>{kpi.label}</span>
                                 </button>
                             );
                         })
                     )}
-                    {docTypeFilter !== 'all' && (
-                        <div className="ml-auto flex items-center gap-2 pl-4 border-l border-slate-100">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vista documento</span>
-                        </div>
-                    )}
                 </header>
                 )}
+
 
                 {/* MAIN LIST VIEW (DATA TABLE) or DOC FILTER VIEW or DISCREPANCY VIEW */}
                 <main className="flex-1 flex flex-col overflow-hidden relative">

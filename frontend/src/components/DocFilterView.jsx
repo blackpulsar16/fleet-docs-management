@@ -260,36 +260,7 @@ export default function DocFilterView({ docType, docStateFilter, onClearFilter }
     }, [docType]);
 
     return (
-        <div className="flex flex-col h-full overflow-hidden relative">
-            {/* Banner */}
-            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-white border-b border-gray-200 pr-36">
-                <div className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                    <span className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Vista Documento</span>
-                    <div className="w-px h-4 bg-gray-200" />
-                    <span className="text-sm font-semibold text-gray-800">{docLabel}</span>
-                    {!isLoading && <span className="text-xs text-gray-400">· {total} vehículos</span>}
-                </div>
-                <div className="flex items-center gap-2">
-                    {!isLoading && data && (
-                        <div className="flex items-center gap-2">
-                            {s.ok       > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-gray-200 text-gray-500">{s.ok} vigentes</span>}
-                            {s.expiring > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-amber-200 text-amber-600">{s.expiring} por vencer</span>}
-                            {s.expired  > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-red-200 text-red-600">{s.expired} vencidos</span>}
-                            {s.missing  > 0 && <span className="text-[10px] font-medium px-2 py-0.5 rounded border border-gray-200 text-gray-400">{s.missing} faltantes</span>}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Exit button — top-right corner */}
-            <button
-                onClick={onClearFilter}
-                className="absolute top-2 right-3 z-20 flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-500 text-xs font-medium hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all shadow-sm active:scale-95"
-            >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                Salir vista doc.
-            </button>
+        <div className="flex flex-col h-full overflow-hidden">
 
             {/* Body */}
             {isLoading ? (

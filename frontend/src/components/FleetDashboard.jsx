@@ -471,7 +471,7 @@ export default function FleetDashboard() {
         <div className="flex h-screen overflow-hidden bg-white text-slate-800 font-sans antialiased">
 
             {/* ── SIDEBAR ── */}
-            <aside className="w-56 flex-shrink-0 flex flex-col bg-white text-gray-700 border-r border-gray-200">
+            <aside className="w-56 flex-shrink-0 flex flex-col bg-gray-50 text-gray-700 border-r border-gray-200">
 
                 {/* Logo */}
                 <div className="px-5 pt-5 pb-4">
@@ -488,7 +488,7 @@ export default function FleetDashboard() {
                         <input
                             type="text"
                             placeholder="Buscar ID o modelo..."
-                            className="w-full pl-7 pr-6 py-2 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 transition-all"
+                            className="w-full pl-7 pr-6 py-2 bg-white border border-gray-200 rounded-md text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -509,7 +509,7 @@ export default function FleetDashboard() {
                             {uniqueUNs.map(un => <option key={un} value={un}>{un}</option>)}
                         </select>
                         <select
-                            className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
+                            className="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-md text-xs text-gray-600 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
                             value={sysStatusFilter}
                             onChange={(e) => setSysStatusFilter(e.target.value)}
                         >

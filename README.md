@@ -33,8 +33,8 @@ flowchart TD
     %% Networks
     subgraph Docker Networks
         direction LR
-        NetFlota[flota-network (Bridge)]
-        NetAuth[authentik_default (External)]
+        NetFlota["flota-network (Bridge)"]
+        NetAuth["authentik_default (External)"]
     end
 ```
 

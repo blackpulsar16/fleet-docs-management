@@ -4,7 +4,15 @@ This repository contains an enterprise-grade fleet document management system. I
 
 The platform also provides a "Human-In-The-Loop" (HITL) interface, enabling fleet managers to verify the AI's extractions against the source files in a secure, performant dashboard.
 
+<img width="1280" height="746" alt="image" src="https://github.com/user-attachments/assets/980d667e-3cff-4f64-8d0f-f6b7494a673a" />
+<img width="1280" height="746" alt="image" src="https://github.com/user-attachments/assets/75c834d0-6125-4a35-961c-115edc601aca" />
+<img width="1280" height="746" alt="image" src="https://github.com/user-attachments/assets/4ec4deb5-8b6d-48be-9b77-906c94d53a75" />
+<img width="1280" height="746" alt="image" src="https://github.com/user-attachments/assets/d441b0de-ea76-44a4-b1eb-b042903e490d" />
+<img width="1280" height="746" alt="image" src="https://github.com/user-attachments/assets/e9548e40-d0b7-41e4-89bf-b46574d92162" />
+
+
 ## System Architecture
+
 
 The application is fully containerized and orchestrated via Docker Compose. Below is a detailed view of the infrastructure, the modules, and how they communicate.
 

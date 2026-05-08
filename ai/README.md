@@ -34,6 +34,16 @@ stateDiagram-v2
 - **Classification Node**: Uses Gemini to analyze the first page of a document and classify it into one of the allowed `doc_type` enums.
 - **Analysis Nodes**: Highly specialized prompt templates and LLM chains optimized for extracting precise key-value pairs (e.g., VIN, license plates, expiration dates) based on the classified document type.
 
+### Extracted Data by Document Type
+
+The AI uses strict Pydantic schemas to ensure structured, consistent JSON output. In addition to the fields listed below, every extraction returns a `confidence_score` (0-100) and `extraction_notes` (for OCR warnings/anomalies):
+
+- **Dictamen de Gas (`dictamen_gas`)**: Issue date, location (verification center address), serial number (NIV/VIN), and approved status (boolean).
+- **Tarjeta de Circulación (`tarjeta_circulacion_front`)**: Owner name, issue date, permanent status (boolean), expiration date, NIV/VIN, folio number, license plate (`placa`), use type (particular/federal), and federal entity (state).
+- **Póliza de Seguro (`poliza_seguro`)**: Issue date, expiration date, insurance company name, policy number, and paragraph/inciso.
+- **Certificación de Blindaje (`certificacion_blindaje`)**: Issue date, armoring company name, armor level, folio, metal plate number, and nested vehicle info (make, type, model, NIV/VIN).
+- **Carta Factura (`bill_make`)**: Issue date, fiscal UUID, client name, and nested vehicle info (make, version, model, NIV/VIN, motor serial number, number of cylinders, and internal vehicle ID).
+
 ## Parallel Processing & SSE
 
 The endpoint `/ai/{vehicle_id}` accepts a list of `UploadFile`. It leverages `asyncio.Queue` and concurrent workers to process multiple files in parallel. 

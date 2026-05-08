@@ -22,7 +22,7 @@ flowchart TD
     
     %% Internal Services
     Backend -->|CRUD| DB[(MariaDB :3306)]
-    Backend -->|Generate Presigned / Proxy| S3[MinIO Object Storage\n:9000 (API) / :9001 (Web)]
+    Backend -->|Generate Presigned / Proxy| S3["MinIO Object Storage\n:9000 (API) / :9001 (Web)"]
     
     Backend <-->|Trigger Ingestion / Return Extracted Data| AI[AI OCR Service\nFastAPI :8003]
     AI -->|Read/Write Files| S3

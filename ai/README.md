@@ -1,29 +1,53 @@
 # AI OCR Ingestion Service
 
-This service provides an intelligent pipeline for document classification and data extraction. It is built to receive uploaded vehicle documents, process them using Large Language Models, and feed structured data into the backend database.
+This microservice acts as the intelligent document processing engine for the Flota management system. It exposes a FastAPI endpoint that handles parallel file uploads, orchestrates Large Language Models (LLMs) via LangGraph, and streams execution progress to the client using Server-Sent Events (SSE).
 
-## Features
+## LangGraph Orchestration Flow
 
-- **Document Classification**: Identifies the type of document uploaded (e.g., `dictamen_gas`, `tarjeta_circulacion_front`, `poliza_seguro`, `certificacion_blindaje`, `bill_make`).
-- **Data Extraction**: Uses Google's Gemini models via Langchain to extract key-value pairs from documents.
-- **Real-time Streaming**: Utilizes Server-Sent Events (SSE) to stream processing status updates back to the frontend in real-time.
-- **Auto-Upload**: Automatically uploads processed files to MinIO and sends the extracted metadata payload to the Backend API. Includes rollback mechanisms if database ingestion fails.
+We use LangGraph to build a deterministic, stateful workflow for processing incoming documents. The workflow utilizes a single router node that classifies the document and then conditionally routes the execution to specialized extraction nodes.
 
-## Tech Stack
+```mermaid
+stateDiagram-v2
+    [*] --> classify_node : Raw Document
+    
+    classify_node --> route_to_specialized_ocr : Determines doc_type
+    
+    state route_to_specialized_ocr <<choice>>
+    
+    route_to_specialized_ocr --> dictamen_gas_analysis : if doc_type == dictamen_gas
+    route_to_specialized_ocr --> circulation_card_analysis : if doc_type == tarjeta_circulacion_front
+    route_to_specialized_ocr --> insurance_pol_analysis : if doc_type == poliza_seguro
+    route_to_specialized_ocr --> armor_cert_analysis : if doc_type == certificacion_blindaje
+    route_to_specialized_ocr --> bill_analysis : if doc_type == bill_make
+    route_to_specialized_ocr --> [*] : if unknown / unclassified
+    
+    dictamen_gas_analysis --> [*] : Structured JSON
+    circulation_card_analysis --> [*] : Structured JSON
+    insurance_pol_analysis --> [*] : Structured JSON
+    armor_cert_analysis --> [*] : Structured JSON
+    bill_analysis --> [*] : Structured JSON
+```
 
-- **Framework**: FastAPI
-- **AI/LLM**: Langchain, LangGraph (for agent logic), and Gemini API
-- **Storage**: MinIO (Python SDK / Boto3)
+## Core Components
 
-## Agents
+- **`SingleFileAgent`**: The main class wrapping the LangGraph state machine. It manages a `SingleFileState` dictionary.
+- **Classification Node**: Uses Gemini to analyze the first page of a document and classify it into one of the allowed `doc_type` enums.
+- **Analysis Nodes**: Highly specialized prompt templates and LLM chains optimized for extracting precise key-value pairs (e.g., VIN, license plates, expiration dates) based on the classified document type.
 
-The core extraction logic resides in the `agents/` directory, where `SingleFileAgent` orchestrates the pipeline from classification to targeted extraction based on the document type.
+## Parallel Processing & SSE
 
-## Development
+The endpoint `/ai/{vehicle_id}` accepts a list of `UploadFile`. It leverages `asyncio.Queue` and concurrent workers to process multiple files in parallel. 
+- As each node in the LangGraph finishes, an event is yielded to the queue.
+- These events are pushed to the frontend in real-time as an SSE stream (`text/event-stream`), providing a responsive UX without blocking HTTP requests.
+- Upon successful LLM extraction, the service uploads the raw file to MinIO and sends an internal POST request to the Backend API to persist the extracted payload.
 
-This service requires a valid Gemini API key and optionally LangSmith keys for tracing. It uses `uv` for dependency management.
+## Development & Tracing
+
+This project uses `uv` for lightning-fast dependency management and supports **LangSmith** for full observability of LLM chains.
 
 ```bash
 uv sync
 fastapi dev main.py
 ```
+
+To enable tracing, ensure `LANGSMITH_API_KEY` and `LANGCHAIN_TRACING_V2=true` are set in your `.env`.

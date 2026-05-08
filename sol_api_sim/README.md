@@ -1,23 +1,25 @@
 # SOL API Simulator
 
-The SOL (Sistema de Operación Logística) API Simulator is a lightweight mock service designed to replicate an external vehicle tracking and status system.
+The Sistema de Operación Logística (SOL) API Simulator is a microservice built to replicate an external ERP or third-party vehicle tracking API. 
 
-## Features
+In a production environment, the Flota platform would integrate with a corporate logistics system to verify if a vehicle is currently active, assigned to a "plaza", or out of service. Because that external system is unavailable in the local development environment, this service mocks its behavior using raw Excel data.
 
-- **Excel Data Source**: Loads vehicle data from a local Excel file (`docs/202603189426910.xlsx`) into memory.
-- **File Watcher**: Monitors the Excel file for changes and automatically hot-reloads the data without requiring a server restart.
-- **Data Endpoints**: Provides endpoints to look up a specific vehicle's status by its identifier ("económico") and aggregate lists of "plazas" and statuses.
+## Technical Implementation
 
-## Tech Stack
+### Data Ingestion via Pandas
+- The application uses `pandas` and `numpy` to ingest a statically provided Excel spreadsheet (`docs/202603189426910.xlsx`).
+- The DataFrame is loaded entirely into RAM, setting the vehicle identifier ("económico") as the index for $O(1)$ lookup times.
 
-- **Framework**: FastAPI
-- **Data Processing**: Pandas & NumPy
+### Hot-Reloading with `asyncio` File Watchers
+To simulate real-time updates from an external system without needing to restart the Docker container:
+- The app implements a FastAPI `lifespan` context manager.
+- On startup, it spawns an asynchronous background task (`file_watcher`).
+- The watcher polls `os.path.getmtime(FILE_PATH)` every 5 minutes. If the modified timestamp of the Excel file changes, it safely halts and re-reads the DataFrame into the global state, ensuring the endpoints immediately serve the fresh data.
 
-## Development
+## Endpoints
 
-This module uses `uv` for dependency management. To run the simulator locally:
+- `GET /sol/vehiculo/{economico}`: Returns the complete dictionary of data for a specific vehicle index.
+- `GET /sol/plazas`: Returns an aggregated mapping of vehicle IDs to their assigned regions.
+- `GET /sol/estatus`: Returns an aggregated mapping of vehicle IDs to their operational status.
 
-```bash
-uv sync
-fastapi dev main.py
-```
+All endpoints enforce OIDC authentication to mirror internal corporate security boundaries.

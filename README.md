@@ -1,30 +1,66 @@
 # Flota Documents Management System
 
-This repository contains a comprehensive fleet document management system. It is designed to automate the ingestion, classification, data extraction, and verification of vehicle-related documents (such as insurance policies, circulation cards, invoices, and gas certifications) using AI-powered Optical Character Recognition (OCR).
+This repository contains an enterprise-grade fleet document management system. It leverages a microservices architecture to automate the ingestion, classification, and data extraction of vehicle-related documents (insurance policies, circulation cards, invoices, etc.) using AI-powered Optical Character Recognition (OCR) backed by Large Language Models (LLMs). 
+
+The platform also provides a "Human-In-The-Loop" (HITL) interface, enabling fleet managers to verify the AI's extractions against the source files in a secure, performant dashboard.
 
 ## System Architecture
 
-The project is built using a microservices architecture orchestrated with Docker Compose:
+The application is fully containerized and orchestrated via Docker Compose. Below is a detailed view of the infrastructure, the modules, and how they communicate.
 
-- **Frontend (`/frontend`)**: A React + Vite web application styled with TailwindCSS, offering a modern, minimalist dashboard (inspired by Frappe design philosophy) for fleet managers to review document statuses and verify AI-extracted data.
-- **Backend API (`/backend`)**: A FastAPI Python service that handles database operations, serves document data, and proxies secure document previews from MinIO using JWT-based authorization.
-- **AI OCR Service (`/ai`)**: A FastAPI Python service that acts as an ingestion pipeline. It uses Langchain and Gemini to perform OCR, classify documents, extract structured fields, and stream progress back to the frontend via Server-Sent Events (SSE).
-- **SOL API Simulator (`/sol_api_sim`)**: A FastAPI mock service that simulates an external logistics system ("SOL") by serving vehicle status and location data loaded from an Excel file into memory.
-- **Database (`/db`)**: MariaDB initialization scripts.
-- **Storage**: MinIO is used for secure, S3-compatible document object storage.
-- **Authentication**: OIDC integration via Authentik for secure access control, distinguishing standard users from authorized editors.
+```mermaid
+flowchart TD
+    %% Users & Identity
+    User([Editor / Manager]) -->|HTTPS / 8001| Nginx[Frontend: React + Vite\nNginx :80]
+    User -.->|OIDC Login| Authentik[Authentik IdP\nExternal Network]
+    
+    %% Authentication Layer
+    Nginx -->|OIDC Auth Token| Authentik
+    
+    %% API Routing
+    Nginx -->|/api/*| Backend[Backend API\nFastAPI :8001]
+    
+    %% Internal Services
+    Backend -->|CRUD| DB[(MariaDB :3306)]
+    Backend -->|Generate Presigned / Proxy| S3[MinIO Object Storage\n:9000 (API) / :9001 (Web)]
+    
+    Backend <-->|Trigger Ingestion / Return Extracted Data| AI[AI OCR Service\nFastAPI :8003]
+    AI -->|Read/Write Files| S3
+    AI -->|Fetch Metadata| DB
+    
+    Backend -->|Fetch External Status| SolAPI[SOL API Simulator\nFastAPI Internal]
 
-## Getting Started
+    %% Networks
+    subgraph Docker Networks
+        direction LR
+        NetFlota[flota-network (Bridge)]
+        NetAuth[authentik_default (External)]
+    end
+```
 
-1. Copy `.env.example` to `.env` and fill in the required environment variables (database credentials, S3 keys, LangSmith/Gemini API keys, and OIDC settings).
-2. Start the services using Docker Compose:
+### Module Breakdown
 
+1. **Frontend (`/frontend`)**: Served via Nginx on port `8001`. A React Single Page Application (SPA) utilizing Vite, TailwindCSS, and React Query. It intercepts API calls to the backend and AI services and handles Authentik login redirects.
+2. **Backend API (`/backend`)**: A FastAPI application running internally on port `8001` (exposed via the frontend proxy). Acts as the central orchestrator, managing relational data in MariaDB via SQLAlchemy and generating short-lived JWT tokens to securely proxy MinIO files to the browser.
+3. **AI OCR Service (`/ai`)**: A separate FastAPI instance running on port `8003`. Receives binary file uploads, utilizes LangChain/LangGraph and Gemini models to classify and extract structured data, streams Server-Sent Events (SSE) back to the UI, and persists the final payload to the Backend.
+4. **SOL API Simulator (`/sol_api_sim`)**: A mock microservice mimicking an external ERP/Logistics provider. It hot-reloads data from an Excel spreadsheet into a Pandas DataFrame and exposes it via REST endpoints.
+5. **Database (`/db`)**: MariaDB container mapping `mariadb_data` for persistence.
+6. **Object Storage (`/minio`)**: MinIO handling all S3-compatible file storage. Port `9000` is used for the S3 API and `9001` for the administrative console.
+
+## Authentication & Security
+
+We use **Authentik** as the Identity Provider (IdP) for OIDC (OpenID Connect). 
+- The frontend initiates an authorization code flow with Authentik.
+- Upon success, the frontend receives a JWT Access Token.
+- All requests to the Backend and AI endpoints require this Bearer token in the `Authorization` header.
+- The Backend validates this token (`auth.py`) against the Authentik Discovery URL (`OIDC_DISCOVERY_URL`) and enforces Role-Based Access Control (RBAC), verifying if the user has `editor` privileges before allowing write operations.
+
+## Quick Start
+
+1. Duplicate `.env.example` to `.env` and configure your credentials (MySQL, MinIO, Gemini, Authentik).
+2. Ensure you have the external `authentik_default` network running (or adjust your `docker-compose.yml` if Authentik is deployed differently).
+3. Start the cluster:
    ```bash
-   docker compose up -d
+   docker compose up -d --build
    ```
-
-3. The services will be available at:
-   - **Frontend**: `http://localhost:8001`
-   - **Backend API**: `http://localhost:8001/api` (proxied via frontend/nginx)
-   - **AI Service**: Internal port 8003
-   - **MinIO Console**: `http://localhost:9001`
+4. Access the dashboard at [http://localhost:8001](http://localhost:8001).

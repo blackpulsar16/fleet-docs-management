@@ -38,11 +38,13 @@ stateDiagram-v2
 
 The AI uses strict Pydantic schemas to ensure structured, consistent JSON output. In addition to the fields listed below, every extraction returns a `confidence_score` (0-100) and `extraction_notes` (for OCR warnings/anomalies):
 
-- **Dictamen de Gas (`dictamen_gas`)**: Issue date, location (verification center address), serial number (NIV/VIN), and approved status (boolean).
-- **Tarjeta de Circulación (`tarjeta_circulacion_front`)**: Owner name, issue date, permanent status (boolean), expiration date, NIV/VIN, folio number, license plate (`placa`), use type (particular/federal), and federal entity (state).
-- **Póliza de Seguro (`poliza_seguro`)**: Issue date, expiration date, insurance company name, policy number, and paragraph/inciso.
-- **Certificación de Blindaje (`certificacion_blindaje`)**: Issue date, armoring company name, armor level, folio, metal plate number, and nested vehicle info (make, type, model, NIV/VIN).
-- **Carta Factura (`bill_make`)**: Issue date, fiscal UUID, client name, and nested vehicle info (make, version, model, NIV/VIN, motor serial number, number of cylinders, and internal vehicle ID).
+| Document Type | Internal ID | Extracted Fields |
+| :--- | :--- | :--- |
+| **Dictamen de Gas** | `dictamen_gas` | `issue_date`, `location` (verification center), `serial_number` (NIV/VIN), `approved` (boolean) |
+| **Tarjeta de Circulación** | `tarjeta_circulacion_front` | `name` (owner), `issue_date`, `is_permanent` (boolean), `expiration_date`, `niv` (VIN), `folio`, `placa`, `use` (particular/federal), `federal_entity` (state) |
+| **Póliza de Seguro** | `poliza_seguro` | `issue_date`, `expiration_date`, `insurance_company`, `policy` (number), `paragraph` (inciso) |
+| **Certificación de Blindaje** | `certificacion_blindaje` | `issue_date`, `armoring_company`, `armor_level`, `folio`, `metal_plate_number`, `vehicle_info` (`make`, `type`, `model`, `niv`) |
+| **Carta Factura** | `bill_make` | `issue_date`, `uuid` (fiscal), `client_name`, `vehicle_info` (`make`, `version`, `model`, `niv`, `motor_serial_numer`, `number_cylinders`, `vehicle_id`) |
 
 ## Parallel Processing & SSE
 

@@ -1,16 +1,33 @@
-# React + Vite
+# Frontend - Flota Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a modern web application built with React, Vite, and TailwindCSS. It serves as the primary interface for fleet managers to monitor vehicle documentation, handle human-in-the-loop (HITL) verifications, and identify discrepancies in vehicle records.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Dashboard View**: Provides a high-level summary of fleet document statuses (Ok, Expiring, Expired, Missing) across different document types.
+- **Document Verification**: A minimal, professional UI to review AI-extracted document data against the original document file side-by-side.
+- **Authentication**: Secured via OIDC (Authentik). Role-based access ensures that only authorized editors can modify or verify document data.
+- **Bulk Downloads**: Support for downloading ZIP archives of documents based on vehicle or document status.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 19 + Vite
+- **Styling**: TailwindCSS v4 with a Frappe.io-inspired minimalist design philosophy.
+- **Icons**: Lucide React
+- **State Management / Data Fetching**: React Query
+- **Authentication**: `react-oidc-context` & `oidc-client-ts`
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+To run the frontend locally for development:
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+**Note:** Ensure that the Backend API and AI services are running, and that your `.env` contains the correct VITE_AUTHENTIK variables for OIDC login to function.
